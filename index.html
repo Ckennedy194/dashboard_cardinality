@@ -326,7 +326,7 @@ STK_POSTCONV.push({n:"Richard Levine",t:"Investor",c:0,a:0,b:3463,w:0,o:0});
 STK_POSTCONV.push({n:"Girish Chandrasekhar",t:"Investor",c:0,a:0,b:3463,w:0,o:0});
 STK_POSTCONV.forEach(s=>{s.io=s.c+s.a+s.b;s.fd=s.io+s.w+s.o});
 
-const ACAP_BASIS=11935000, BHC_BASIS=10000000, BK_BASIS=2050000;
+const ACAP_BASIS=6500000, BHC_BASIS=10000000, BK_BASIS=2050000;
 
 // ═══════════════════════════════════════════════════════════════
 // FORMATTING
@@ -588,7 +588,7 @@ function update(){
 
   // Investor proceeds
   const invs=[{n:"Boathouse Capital (BHC)",basis:BHC_BASIS,proc:w.bhcTot},
-    {n:"ACAP (All B-Series)",basis:ACAP_BASIS,proc:w.acapTot},
+    {n:"ACAP (Attain Capital)",basis:ACAP_BASIS,proc:w.acapTot},
     {n:"BarronKent Ventures",basis:BK_BASIS,proc:w.bkTot}];
   document.getElementById("proctbl").innerHTML=invs.map(v=>{
     const m=v.proc/v.basis,g=v.proc-v.basis;
