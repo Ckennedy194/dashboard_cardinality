@@ -8,13 +8,13 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script>
-tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif'],mono:['JetBrains Mono','monospace']}}}}
+tailwind.config={theme:{extend:{fontFamily:{sans:["Inter","sans-serif"],mono:["JetBrains Mono","monospace"]}}}}
 </script>
 <style>
 :root{--bg:#0F172A;--card:#1E293B;--border:#334155;--muted:#94A3B8;--emerald:#10B981;--blue:#3B82F6;--purple:#8B5CF6;--amber:#F59E0B;--red:#EF4444}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:#E2E8F0;line-height:1.5}
-.mono{font-family:'JetBrains Mono',monospace}
+body{font-family:"Inter",sans-serif;background:var(--bg);color:#E2E8F0;line-height:1.5}
+.mono{font-family:"JetBrains Mono",monospace}
 .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px}
 .card-sm{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px}
 .badge-g{background:#065F46;color:#34D399;padding:2px 10px;border-radius:9999px;font-size:11px;font-weight:600}
@@ -22,12 +22,16 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:#E2E8F0;line-heig
 input[type=range]{-webkit-appearance:none;width:100%;height:8px;border-radius:4px;background:linear-gradient(90deg,#334155,#10B981);outline:none}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:#10B981;cursor:pointer;box-shadow:0 0 12px rgba(16,185,129,.5)}
 input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;background:#10B981;cursor:pointer;border:none}
+input[type=date]{background:#1E293B;border:1px solid #334155;color:#E2E8F0;border-radius:8px;padding:6px 12px;font-family:"JetBrains Mono",monospace;font-size:14px}
+input[type=date]::-webkit-calendar-picker-indicator{filter:invert(0.7)}
+body.light input[type=date]{background:#fff;border-color:#E2E8F0;color:#1E293B}
+body.light input[type=date]::-webkit-calendar-picker-indicator{filter:none}
 table{border-collapse:collapse;width:100%}
 th{text-align:left;padding:8px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);border-bottom:1px solid var(--border);cursor:pointer;user-select:none}
 th:hover{color:var(--emerald)}
 td{padding:6px 12px;font-size:13px;border-bottom:1px solid rgba(51,65,85,.3)}
-.num{text-align:right;font-family:'JetBrains Mono',monospace;font-size:13px}
-.kpi-val{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;line-height:1.2}
+.num{text-align:right;font-family:"JetBrains Mono",monospace;font-size:13px}
+.kpi-val{font-family:"JetBrains Mono",monospace;font-size:28px;font-weight:700;line-height:1.2}
 .kpi-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:4px}
 .kpi-sm .kpi-val{font-size:20px}
 .step{display:flex;align-items:center;gap:12px;padding:10px 14px;border-left:3px solid var(--border);margin-bottom:2px;transition:all .2s}
@@ -35,12 +39,17 @@ td{padding:6px 12px;font-size:13px;border-bottom:1px solid rgba(51,65,85,.3)}
 .step.off{border-left-color:var(--red);opacity:.4}
 .step-n{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
 .nav-a{transition:color .2s}.nav-a:hover{color:var(--emerald)}
+.tab-btn{padding:6px 16px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;border:1px solid transparent}
+.tab-btn.active{background:var(--emerald);color:#fff;border-color:var(--emerald)}
+.tab-btn:not(.active){background:transparent;color:var(--muted);border-color:var(--border)}
+.tab-btn:not(.active):hover{color:#E2E8F0;border-color:var(--muted)}
 body.light{background:#F8FAFC;color:#1E293B}
 body.light .card,body.light .card-sm{background:#fff;border-color:#E2E8F0}
 body.light th{color:#64748B;border-color:#E2E8F0}
 body.light td{border-color:#F1F5F9}
 body.light .kpi-lbl{color:#64748B}
 body.light input[type=range]{background:linear-gradient(90deg,#E2E8F0,#10B981)}
+body.light .tab-btn:not(.active){color:#64748B;border-color:#E2E8F0}
 @media print{body{background:#fff!important;color:#000!important}.card,.card-sm{border:1px solid #ddd!important;background:#fff!important}nav,.slider-wrap,.no-print{display:none!important}}
 @media(max-width:768px){.kpi-val{font-size:20px}}
 html{scroll-behavior:smooth}
@@ -50,17 +59,15 @@ canvas{max-height:300px}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body class="min-h-screen">
-
 <!-- Banner -->
 <div class="bg-amber-500/10 border-b border-amber-500/30 text-center py-2 px-4 text-amber-500 text-xs font-semibold tracking-widest uppercase">
 Privileged and Confidential — Preliminary Illustrative Analysis
 </div>
-
 <!-- Nav -->
 <nav class="sticky top-0 z-50 bg-slate-900/95 backdrop-blur border-b border-slate-700/50 no-print">
 <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
 <div class="flex items-center gap-3">
-<span class="text-emerald-500 font-bold text-xl">◆</span>
+<span class="text-emerald-500 font-bold text-xl">&#9670;</span>
 <span class="font-bold text-lg tracking-tight">Cardinality</span>
 <span class="text-slate-500 text-sm ml-2 hidden md:inline">Investment Waterfall Analysis</span>
 </div>
@@ -76,30 +83,20 @@ Privileged and Confidential — Preliminary Illustrative Analysis
 <div class="relative" id="exportMenu">
 <button onclick="toggleExportMenu()" class="ml-3 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5" title="Export options">
 <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
-Export ▾</button>
+Export &#9662;</button>
 <div id="exportDropdown" class="hidden absolute right-0 top-full mt-1 w-64 bg-slate-800 border border-slate-600 rounded-lg shadow-2xl z-50 overflow-hidden">
 <div class="px-3 py-2 text-xs text-slate-400 uppercase tracking-wider border-b border-slate-700 font-semibold">Full Dashboard</div>
-<button onclick="exportPDF();toggleExportMenu()" class="w-full text-left px-3 py-2.5 text-sm text-slate-200 hover:bg-slate-700 flex items-center gap-2">
-<span class="text-emerald-400">📄</span> Download Full PDF</button>
+<button onclick="exportPDF();toggleExportMenu()" class="w-full text-left px-3 py-2.5 text-sm text-slate-200 hover:bg-slate-700 flex items-center gap-2">&#128196; Download Full PDF</button>
 <div class="px-3 py-2 text-xs text-slate-400 uppercase tracking-wider border-b border-t border-slate-700 font-semibold">Investor Summaries</div>
-<button onclick="exportInvestorPDF('BHC');toggleExportMenu()" class="w-full text-left px-3 py-2.5 text-sm text-slate-200 hover:bg-slate-700 flex items-center gap-2">
-<span class="text-blue-400">🏛</span> BHC (Boathouse Capital)</button>
-<button onclick="exportInvestorPDF('ACAP');toggleExportMenu()" class="w-full text-left px-3 py-2.5 text-sm text-slate-200 hover:bg-slate-700 flex items-center gap-2">
-<span class="text-emerald-400">📊</span> ACAP (Attain Capital)</button>
-<button onclick="exportInvestorPDF('BK');toggleExportMenu()" class="w-full text-left px-3 py-2.5 text-sm text-slate-200 hover:bg-slate-700 flex items-center gap-2">
-<span class="text-purple-400">💼</span> BarronKent Ventures</button>
+<button onclick="exportInvestorPDF('BHC');toggleExportMenu()" class="w-full text-left px-3 py-2.5 text-sm text-slate-200 hover:bg-slate-700 flex items-center gap-2">&#127963; BHC (Boathouse Capital)</button>
+<button onclick="exportInvestorPDF('ACAP');toggleExportMenu()" class="w-full text-left px-3 py-2.5 text-sm text-slate-200 hover:bg-slate-700 flex items-center gap-2">&#128202; ACAP (Attain Capital)</button>
+<button onclick="exportInvestorPDF('BK');toggleExportMenu()" class="w-full text-left px-3 py-2.5 text-sm text-slate-200 hover:bg-slate-700 flex items-center gap-2">&#128188; BarronKent Ventures</button>
 <div class="border-t border-slate-700">
-<button onclick="exportAllInvestorPDFs();toggleExportMenu()" class="w-full text-left px-3 py-2.5 text-sm text-emerald-400 hover:bg-slate-700 font-semibold flex items-center gap-2">
-⬇️ Download All 3 Investor Reports</button>
-</div>
-</div>
-</div>
-<button onclick="document.body.classList.toggle('light')" class="ml-1 text-slate-400 hover:text-emerald-400 text-lg" title="Toggle theme">◑</button>
-</div>
-</div>
-</nav>
-
-<!-- Slider -->
+<button onclick="exportAllInvestorPDFs();toggleExportMenu()" class="w-full text-left px-3 py-2.5 text-sm text-emerald-400 hover:bg-slate-700 font-semibold flex items-center gap-2">&#11015; Download All 3</button>
+</div></div></div>
+<button onclick="document.body.classList.toggle('light')" class="ml-1 text-slate-400 hover:text-emerald-400 text-lg" title="Toggle theme">&#9681;</button>
+</div></div></nav>
+<!-- Slider + Date -->
 <div class="sticky top-[53px] z-40 bg-slate-900/95 backdrop-blur border-b border-slate-700/50 slider-wrap no-print">
 <div class="max-w-7xl mx-auto px-4 py-4">
 <div class="flex items-center gap-6 flex-wrap">
@@ -109,219 +106,178 @@ Export ▾</button>
 </div>
 <div class="flex-1 min-w-[200px]">
 <input type="range" id="evSlider" min="0" max="35" value="4" step="1">
-<div class="flex justify-between text-xs text-slate-600 mt-1"><span>$50M</span><span>$150M</span><span>$250M</span><span>$390M</span></div>
+<div class="flex justify-between text-xs text-slate-600 mt-1"><span>$50M</span><span>$150M</span><span>$250M</span><span>$400M</span></div>
 </div>
+<div class="flex-shrink-0 ml-4">
+<div class="text-xs text-slate-500 uppercase tracking-wider mb-1">Exit Date</div>
+<input type="date" id="exitDatePicker" value="2027-12-31" min="2026-04-01" max="2035-12-31">
+<div class="text-xs text-slate-500 mt-1" id="pikInfo">PIK: 1.83 yrs &middot; Factor: 1.1515x</div>
 </div>
-</div>
-</div>
-
+</div></div></div>
 <div class="max-w-7xl mx-auto px-4 py-8 space-y-12">
-
-<!-- S1: EXECUTIVE SUMMARY -->
+<!-- S1 -->
 <section id="summary">
 <h2 class="text-2xl font-bold mb-1">Executive Summary</h2>
-<p class="text-sm text-slate-400 mb-6">Key metrics at the selected exit enterprise value</p>
+<p class="text-sm text-slate-400 mb-6">Key metrics at the selected exit enterprise value and date</p>
 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-<div class="card"><div id="k_ev" class="kpi-val text-emerald-500">—</div><div class="kpi-lbl">Enterprise Value</div></div>
-<div class="card"><div id="k_fd" class="kpi-val text-blue-400">—</div><div class="kpi-lbl">Fully Diluted Shares</div></div>
-<div class="card"><div id="k_eq" class="kpi-val text-emerald-400">—</div><div class="kpi-lbl">Equity Available</div></div>
-<div class="card"><div id="k_rps" class="kpi-val text-white">—</div><div class="kpi-lbl">Residual $ / Share</div></div>
+<div class="card"><div id="k_ev" class="kpi-val text-emerald-500">&mdash;</div><div class="kpi-lbl">Enterprise Value</div></div>
+<div class="card"><div id="k_fd" class="kpi-val text-blue-400">&mdash;</div><div class="kpi-lbl">Fully Diluted Shares</div></div>
+<div class="card"><div id="k_eq" class="kpi-val text-emerald-400">&mdash;</div><div class="kpi-lbl">Equity Available</div></div>
+<div class="card"><div id="k_rps" class="kpi-val text-white">&mdash;</div><div class="kpi-lbl">Residual $ / Share</div></div>
 </div>
 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-<div class="card-sm kpi-sm"><div id="k_fee" class="kpi-val text-slate-300">—</div><div class="kpi-lbl">Transaction Fees (3%)</div></div>
-<div class="card-sm kpi-sm"><div id="k_ceo" class="kpi-val text-slate-300">—</div><div class="kpi-lbl">CEO Phantom Equity</div></div>
-<div class="card-sm kpi-sm"><div id="k_debt" class="kpi-val text-slate-300">—</div><div class="kpi-lbl">BHC Senior Debt</div></div>
-<div class="card-sm kpi-sm"><div id="k_pref" class="kpi-val text-slate-300">—</div><div class="kpi-lbl">Pref Liq Pref Paid</div></div>
+<div class="card-sm kpi-sm"><div id="k_fee" class="kpi-val text-slate-300">&mdash;</div><div class="kpi-lbl">Transaction Fees (3%)</div></div>
+<div class="card-sm kpi-sm"><div id="k_ceo" class="kpi-val text-slate-300">&mdash;</div><div class="kpi-lbl">CEO Phantom Equity</div></div>
+<div class="card-sm kpi-sm"><div id="k_debt" class="kpi-val text-slate-300">&mdash;</div><div class="kpi-lbl">BHC Senior Debt</div></div>
+<div class="card-sm kpi-sm"><div id="k_pref" class="kpi-val text-slate-300">&mdash;</div><div class="kpi-lbl">Pref Liq Pref Paid</div></div>
 </div>
 <div class="card"><canvas id="miniWF" height="80"></canvas></div>
 </section>
-
-<!-- S2: CAPITAL STRUCTURE -->
+<!-- S2 Cap Table -->
 <section id="cap">
-<h2 class="text-2xl font-bold mb-1">Capital Structure</h2>
-<p class="text-sm text-slate-400 mb-6">Issued & Outstanding vs Fully Diluted ownership</p>
+<div class="flex items-center justify-between mb-4 flex-wrap gap-3">
+<div><h2 class="text-2xl font-bold mb-1">Capital Structure</h2>
+<p class="text-sm text-slate-400">Issued &amp; Outstanding vs Fully Diluted ownership</p></div>
+<div class="flex gap-2" id="capTabs">
+<button class="tab-btn active" onclick="switchCapTab('current')">Current Cap Table</button>
+<button class="tab-btn" onclick="switchCapTab('postconv')">Post-Conversion Cap Table</button>
+</div></div>
+<div id="capTabInfo" class="text-xs text-slate-500 mb-4 p-3 rounded-lg" style="background:rgba(51,65,85,.2);border:1px solid rgba(51,65,85,.3)"></div>
 <div class="grid md:grid-cols-2 gap-6 mb-6">
-<div class="card"><h3 class="text-xs font-semibold text-slate-400 mb-3 uppercase tracking-wider">Issued & Outstanding — 1,346,685</h3><canvas id="pieIO" height="220"></canvas></div>
-<div class="card"><h3 class="text-xs font-semibold text-slate-400 mb-3 uppercase tracking-wider">Fully Diluted — 1,452,102</h3><canvas id="pieFD" height="220"></canvas></div>
+<div class="card"><h3 id="pieIOLabel" class="text-xs font-semibold text-slate-400 mb-3 uppercase tracking-wider">Issued &amp; Outstanding</h3><canvas id="pieIO" height="220"></canvas></div>
+<div class="card"><h3 id="pieFDLabel" class="text-xs font-semibold text-slate-400 mb-3 uppercase tracking-wider">Fully Diluted</h3><canvas id="pieFD" height="220"></canvas></div>
 </div>
-<div class="card mb-6">
-<h3 class="text-xs font-semibold text-slate-400 mb-3 uppercase tracking-wider">Stakeholder Detail (click headers to sort)</h3>
-<div class="overflow-x-auto"><table id="stbl"><thead><tr>
-<th onclick="srt(0)">Name</th><th onclick="srt(1)">Type</th><th onclick="srt(2)" class="num">Common</th><th onclick="srt(3)" class="num">Pref A</th><th onclick="srt(4)" class="num">Pref B</th><th onclick="srt(5)" class="num">I&O</th><th onclick="srt(6)" class="num">FD</th><th onclick="srt(7)" class="num">FD%</th>
+<div class="card overflow-x-auto"><table><thead><tr>
+<th onclick="srt(0)">Stakeholder</th><th onclick="srt(1)">Type</th>
+<th onclick="srt(2)" class="num">Common</th><th onclick="srt(3)" class="num">Pref A</th>
+<th onclick="srt(4)" class="num">Pref B</th><th onclick="srt(5)" class="num">I&amp;O</th>
+<th onclick="srt(6)" class="num">FD</th><th onclick="srt(7)" class="num">FD %</th>
 </tr></thead><tbody id="stbody"></tbody></table></div>
-</div>
-<div class="card">
-<h3 class="text-xs font-semibold text-slate-400 mb-3 uppercase tracking-wider">Class B Tranche Breakdown — 438,367 shares</h3>
-<table><thead><tr><th>Tranche</th><th>Source</th><th class="num">Shares</th></tr></thead><tbody>
-<tr><td>B-1</td><td class="text-slate-400">Common → Pref (Tranche 1)</td><td class="num mono">200,000</td></tr>
-<tr><td>B-2</td><td class="text-slate-400">Common → Pref (Tranche 2)</td><td class="num mono">50,000</td></tr>
-<tr><td>B-3</td><td class="text-slate-400">Common → Pref (Tranche 3)</td><td class="num mono">26,250</td></tr>
-<tr><td>B-4</td><td class="text-slate-400">2023 Series A + Note Conv</td><td class="num mono">74,730</td></tr>
-<tr><td>B-5</td><td class="text-slate-400">2022 Note Conv</td><td class="num mono">18,125</td></tr>
-<tr><td>B-6</td><td class="text-slate-400">2024 Note Conv + Series A</td><td class="num mono">69,262</td></tr>
-<tr class="font-semibold border-t border-slate-600"><td>Total</td><td></td><td class="num mono">438,367</td></tr>
-</tbody></table>
-</div>
 </section>
-
-<!-- S3: WATERFALL -->
+<!-- S3 Waterfall -->
 <section id="waterfall">
-<h2 class="text-2xl font-bold mb-1">Waterfall Analysis</h2>
-<p class="text-sm text-slate-400 mb-6">Distribution priority and proceeds at selected EV</p>
-<div class="grid md:grid-cols-3 gap-6 mb-6">
-<div class="card"><h3 class="text-xs font-semibold text-slate-400 mb-4 uppercase tracking-wider">Distribution Priority</h3><div id="steps"></div></div>
-<div class="card md:col-span-2"><canvas id="wfChart" height="260"></canvas></div>
-</div>
-<div class="card mb-6">
-<h3 class="text-xs font-semibold text-slate-400 mb-3 uppercase tracking-wider">Tranche Conversion Analysis</h3>
-<div class="overflow-x-auto"><table><thead><tr><th>Tranche</th><th class="num">Shares</th><th class="num">Total Liq Pref</th><th class="num">As-Converted</th><th>Status</th><th class="num">Payout</th></tr></thead><tbody id="tconv"></tbody></table></div>
-</div>
-<div class="card">
-<h3 class="text-xs font-semibold text-slate-400 mb-3 uppercase tracking-wider">Key Investor Proceeds</h3>
-<div class="overflow-x-auto"><table><thead><tr><th>Investor</th><th class="num">Basis</th><th class="num">Proceeds</th><th class="num">MOIC</th><th class="num">Gain/(Loss)</th></tr></thead><tbody id="proctbl"></tbody></table></div>
-</div>
-</section>
-
-<!-- S4: RETURNS -->
+<h2 class="text-2xl font-bold mb-1">Waterfall Distribution</h2>
+<p class="text-sm text-slate-400 mb-6">Priority of payments from enterprise value</p>
+<div class="grid md:grid-cols-2 gap-6">
+<div class="card"><h3 class="text-xs font-semibold text-slate-400 mb-3 uppercase tracking-wider">Distribution Waterfall</h3><div id="steps"></div></div>
+<div class="card" style="min-height:350px"><canvas id="wfChart"></canvas></div>
+</div></section>
+<!-- S4 Returns -->
 <section id="returns">
 <h2 class="text-2xl font-bold mb-1">Investor Returns</h2>
-<p class="text-sm text-slate-400 mb-6">MOIC and dollar returns across exit scenarios</p>
-<div class="grid md:grid-cols-3 gap-6 mb-6">
-<div class="card md:col-span-2"><canvas id="moicLine" height="260"></canvas></div>
-<div class="space-y-4" id="invCards"></div>
-</div>
-<div class="card"><canvas id="dollarChart" height="260"></canvas></div>
-</section>
-
-<!-- S5: TRANCHES -->
+<p class="text-sm text-slate-400 mb-6">Proceeds, MOIC, and gain/(loss) by stakeholder</p>
+<div class="grid md:grid-cols-3 gap-4 mb-6" id="invCards"></div>
+<div class="card mb-6 overflow-x-auto"><table><thead><tr><th>Investor</th><th class="num">Cost Basis</th><th class="num">Proceeds</th><th class="num">MOIC</th><th class="num">Gain/(Loss)</th></tr></thead><tbody id="proctbl"></tbody></table></div>
+<div class="grid md:grid-cols-2 gap-6">
+<div class="card" style="min-height:300px"><canvas id="moicLine"></canvas></div>
+<div class="card" style="min-height:300px"><canvas id="dollarChart"></canvas></div>
+</div></section>
+<!-- S5 Tranches -->
 <section id="tranches">
-<h2 class="text-2xl font-bold mb-1">Preferred Tranches Detail</h2>
-<p class="text-sm text-slate-400 mb-6">7 tranches totaling 569,351 preferred shares · $35.5M total liquidation preference (incl. PIK)</p>
-<div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" id="trCards"></div>
+<h2 class="text-2xl font-bold mb-1">Tranche Conversion Analysis</h2>
+<p class="text-sm text-slate-400 mb-6">Each preferred tranche independently tests: convert to common or take liquidation preference</p>
+<div class="card mb-6 overflow-x-auto"><table><thead><tr><th>Tranche</th><th class="num">Shares</th><th class="num">Liq Pref (w/ PIK)</th><th class="num">As-Converted</th><th class="text-center">Decision</th><th class="num">Payout</th></tr></thead><tbody id="tconv"></tbody></table></div>
+<div class="grid md:grid-cols-3 lg:grid-cols-4 gap-4" id="trCards"></div>
 </section>
-
-<!-- S6: MOIC RATCHET -->
+<!-- S6 Ratchet -->
 <section id="ratchet">
 <h2 class="text-2xl font-bold mb-1">MOIC Ratchet Warrant</h2>
-<p class="text-sm text-slate-400 mb-6">BHC protection: if MOIC < 3.0x target, additional warrant shares issued (capped at 12.5% FD)</p>
+<p class="text-sm text-slate-400 mb-6">BHC receives additional shares if total return &lt; 3.0x target MOIC on $10M basis</p>
 <div class="grid md:grid-cols-2 gap-6">
-<div class="card"><h3 class="text-xs font-semibold text-slate-400 mb-4 uppercase tracking-wider">Warrant Status at Current EV</h3><div id="wInfo"></div></div>
-<div class="card"><canvas id="wChart" height="260"></canvas></div>
-</div>
-</section>
-
-<!-- S7: CEO -->
+<div class="card"><h3 class="text-xs font-semibold text-slate-400 mb-3 uppercase tracking-wider">Warrant Status</h3><div id="wInfo"></div></div>
+<div class="card" style="min-height:280px"><canvas id="wChart"></canvas></div>
+</div></section>
+<!-- S7 CEO -->
 <section id="ceo">
-<h2 class="text-2xl font-bold mb-1">CEO SVPT Incentive</h2>
-<p class="text-sm text-slate-400 mb-6">Synthetic Value Participation Tier — phantom equity bonus</p>
-<div class="card mb-6 border-emerald-500/20" style="background:rgba(16,185,129,.03)">
-<div class="flex items-center gap-4"><div class="text-4xl">💰</div><div>
-<div class="text-xs text-slate-400">At selected Enterprise Value, the CEO bonus is</div>
-<div id="ceoCta" class="text-2xl font-bold text-emerald-400 mono mt-1">—</div>
-</div></div>
+<h2 class="text-2xl font-bold mb-1">CEO SVPT Phantom Equity</h2>
+<p class="text-sm text-slate-400 mb-6">Accelerating tiered bonus: $750K floor, 5% of EV cap</p>
+<div class="grid md:grid-cols-3 gap-4 mb-6">
+<div class="card"><div class="text-xs text-slate-400 mb-1">CEO Total Bonus</div><div id="ceoCta" class="mono text-xl font-bold text-emerald-400">&mdash;</div></div>
+<div class="card"><div class="text-xs text-slate-400 mb-1">Structure</div><div class="text-sm text-slate-300">Tiered 1%&#8594;12% per $10M band<br>Floor: $750K &middot; Cap: 5% EV</div></div>
+<div class="card" style="min-height:250px"><canvas id="ceoChart"></canvas></div>
 </div>
-<div class="grid md:grid-cols-2 gap-6 mb-6">
-<div class="card">
-<h3 class="text-xs font-semibold text-slate-400 mb-3 uppercase tracking-wider">Tier Schedule</h3>
-<table class="text-xs"><thead><tr><th>EV Range</th><th class="num">Rate</th></tr></thead><tbody>
-<tr><td>$0 – $50M</td><td class="num mono">0.00% (Floor: $750K)</td></tr>
-<tr><td>$50M – $60M</td><td class="num mono">1.00%</td></tr>
-<tr><td>$60M – $70M</td><td class="num mono">1.20%</td></tr>
-<tr><td>$70M – $80M</td><td class="num mono">1.60%</td></tr>
-<tr><td>$80M – $90M</td><td class="num mono">2.20%</td></tr>
-<tr><td>$90M – $100M</td><td class="num mono">3.00%</td></tr>
-<tr><td>$100M – $110M</td><td class="num mono">4.00%</td></tr>
-<tr><td>$110M – $120M</td><td class="num mono">5.20%</td></tr>
-<tr><td>$120M – $130M</td><td class="num mono">6.60%</td></tr>
-<tr><td>$130M – $140M</td><td class="num mono">8.20%</td></tr>
-<tr><td>$140M – $150M</td><td class="num mono">10.00%</td></tr>
-<tr><td>$150M+</td><td class="num mono">12.00%</td></tr>
-</tbody></table>
-<p class="text-xs text-slate-500 mt-3">Hard cap: 5% of EV · Floor: $750K (if EV ≥ $50M)</p>
-</div>
-<div class="card"><canvas id="ceoChart" height="260"></canvas></div>
-</div>
-<div class="card">
-<h3 class="text-xs font-semibold text-slate-400 mb-3 uppercase tracking-wider">CEO Bonus Sensitivity Table</h3>
-<div class="overflow-x-auto"><table class="text-xs"><thead><tr><th>Exit EV</th><th class="num">CEO Bonus</th><th class="num">% of EV</th></tr></thead><tbody id="ceoTbl"></tbody></table></div>
-</div>
+<div class="card overflow-x-auto"><table><thead><tr><th>Exit EV</th><th class="num">CEO Bonus</th><th class="num">% of EV</th></tr></thead><tbody id="ceoTbl"></tbody></table></div>
 </section>
-
-<!-- S8: DEBT -->
+<!-- S8 Debt -->
 <section id="debt">
 <h2 class="text-2xl font-bold mb-1">BHC Senior Debt</h2>
-<p class="text-sm text-slate-400 mb-6">$10M principal at 14% interest — interest is a separate obligation, NOT paid from waterfall</p>
+<p class="text-sm text-slate-400 mb-6">$10M principal at 14% — interest included in BHC total returns</p>
 <div class="grid md:grid-cols-2 gap-6">
-<div class="card">
-<h3 class="text-xs font-semibold text-slate-400 mb-3 uppercase tracking-wider">Debt Parameters</h3>
-<table class="text-sm">
-<tr><td class="text-slate-400 py-2">Principal</td><td class="num mono py-2 font-semibold">$10,000,000</td></tr>
-<tr><td class="text-slate-400 py-2">Interest Rate</td><td class="num mono py-2">14.00%</td></tr>
-<tr><td class="text-slate-400 py-2">Origination</td><td class="num mono py-2">Apr 2023</td></tr>
-<tr><td class="text-slate-400 py-2">Assumed Exit</td><td class="num mono py-2">Dec 2027</td></tr>
-<tr><td class="text-slate-400 py-2">Total Interest Accrued</td><td class="num mono py-2">$6,650,000</td></tr>
-<tr class="border-t border-slate-600"><td class="text-slate-400 py-2 font-semibold">Total Obligation</td><td class="num mono py-2 font-bold text-lg">$16,650,000</td></tr>
-</table>
-<div class="mt-4 p-3 rounded-lg text-xs" style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);color:#F59E0B">
-⚠️ Only $10M principal is repaid in the waterfall. The $6.65M in accrued interest is a separate obligation of the company.
-</div>
-</div>
-<div class="card"><canvas id="debtChart" height="260"></canvas></div>
-</div>
-</section>
-
-<footer class="text-center text-xs text-slate-600 py-8 mt-8 border-t border-slate-800">
-Cardinality Investment Waterfall Model v1.5.8 — Generated Feb 2026 — For authorized recipients only
-</footer>
+<div class="card"><div class="space-y-3 text-sm">
+<div class="flex justify-between"><span class="text-slate-400">Principal</span><span class="mono font-semibold">$10,000,000</span></div>
+<div class="flex justify-between"><span class="text-slate-400">Interest Rate</span><span class="mono">14.00%</span></div>
+<div class="flex justify-between"><span class="text-slate-400">Debt Start</span><span class="mono">Apr 1, 2023</span></div>
+<div class="flex justify-between"><span class="text-slate-400">Accrued Interest</span><span class="mono font-semibold" id="debtInterest">&mdash;</span></div>
+<div class="flex justify-between"><span class="text-slate-400">Total Obligation</span><span class="mono font-semibold text-amber-400" id="debtTotal">&mdash;</span></div>
+</div></div>
+<div class="card" style="min-height:250px"><canvas id="debtChart"></canvas></div>
+</div></section>
 </div>
 <script>
+// ═══════════════════════════════════════════════════════════════
+// CONFIG: All model inputs clearly labeled and grouped
+// ═══════════════════════════════════════════════════════════════
+const CONFIG = {
+  // ── Key Dates ──
+  exchangeDate: new Date(2026, 2, 1),      // 3/1/2026 Preferred Exchange Date
+  debtStartDate: new Date(2023, 3, 1),     // 4/1/2023 BHC Senior Debt Start
+  defaultExitDate: new Date(2027, 11, 31), // 12/31/2027 Default Exit
+  noteConvDate: new Date(2026, 11, 31),    // 12/31/2026 2024 Notes Conversion
 
-// ═══════════════════════════════════════════════
-// PRE-COMPUTED MODEL DATA (from Excel model)
-// ═══════════════════════════════════════════════
-const EVS = [50000000, 60000000, 70000000, 80000000, 90000000, 100000000, 110000000, 120000000, 130000000, 140000000, 150000000, 160000000, 170000000, 180000000, 190000000, 200000000, 210000000, 220000000, 230000000, 240000000, 250000000, 260000000, 270000000, 280000000, 290000000, 300000000, 310000000, 320000000, 330000000, 340000000, 350000000, 360000000, 370000000, 380000000, 390000000];
-const BHC_DEBT = [10000000, 10000000, 10000000, 10000000, 10000000, 10000000, 10000000, 10000000, 10000000, 10000000, 10000000, 10000000, 10000000, 10000000, 10000000, 10000000, 10000000, 10000000, 10000000, 10000000, 10000000, 10000000, 10000000, 10000000, 10000000, 10000000, 10000000, 10000000, 10000000, 10000000, 10000000, 10000000, 10000000, 10000000, 10000000];
-const FEES = [1500000, 1800000, 2100000, 2400000, 2700000, 3000000, 3300000, 3600000, 3900000, 4200000, 4500000, 4800000, 5100000, 5400000, 5700000, 6000000, 6300000, 6600000, 6900000, 7200000, 7500000, 7800000, 8100000, 8400000, 8700000, 9000000, 9300000, 9600000, 9900000, 10200000, 10500000, 10800000, 11100000, 11400000, 11700000];
-const BHC_EQUITY = [8048426, 8048426, 8048426, 6863120, 8284007, 9634149, 10969929, 12288472, 13586907, 14862360, 16090167, 17228279, 18304210, 19380141, 20500375, 21664913, 22829450, 22516117, 21600539, 20450282, 20560099, 21419885, 22279671, 23139457, 23999243, 24859029, 25718815, 26578601, 27438387, 28298173, 29157959, 30017745, 30877531, 31737317, 32597103];
-const BHC_TOTAL = [18048426, 18048426, 18048426, 16863120, 18284007, 19634149, 20969929, 22288472, 23586907, 24862360, 26090167, 27228279, 28304210, 29380141, 30500375, 31664913, 32829450, 32516117, 31600539, 30450282, 30560099, 31419885, 32279671, 33139457, 33999243, 34859029, 35718815, 36578601, 37438387, 38298173, 39157959, 40017745, 40877531, 41737317, 42597103];
-const B1_PAY = [6909206, 6909206, 5484025, 7562125, 9127729, 10615382, 12087210, 13540046, 14970726, 16376084, 17728941, 18982970, 20168484, 21353998, 22588327, 23871472, 25154617, 26673756, 28289064, 29941847, 31393299, 32706109, 34018920, 35331731, 36644542, 37957352, 39270163, 40582974, 41895784, 43208595, 44521406, 45834216, 47147027, 48459838, 49772648];
-const B2_PAY = [2303069, 2303069, 2303069, 2303069, 2281932, 2653846, 3021802, 3385012, 3742681, 4094021, 4432235, 4745742, 5042121, 5338500, 5647082, 5967868, 6288654, 6668439, 7072266, 7485462, 7848325, 8176527, 8504730, 8832933, 9161135, 9489338, 9817541, 10145743, 10473946, 10802149, 11130351, 11458554, 11786757, 12114959, 12443162];
-const B3_PAY = [2418222, 2418222, 2418222, 2418222, 2418222, 2418222, 2418222, 2418222, 2418222, 2418222, 2418222, 2491515, 2647114, 2802712, 2964718, 3133131, 3301543, 3500930, 3712940, 3929867, 4120370, 4292677, 4464983, 4637290, 4809596, 4981902, 5154209, 5326515, 5498822, 5671128, 5843434, 6015741, 6188047, 6360354, 6532660];
-const B4_PAY = [7024359, 7024359, 7024359, 7024359, 7024359, 7024359, 7024359, 7024359, 7024359, 7024359, 7024359, 7092987, 7535954, 7978921, 8440129, 8919576, 9399023, 9966649, 10570209, 11187771, 11730106, 12220638, 12711170, 13201701, 13692233, 14182765, 14673296, 15163828, 15654360, 16144891, 16635423, 17125955, 17616487, 18107018, 18597550];
-const B5_PAY = [2844290, 2844290, 2844290, 2844290, 2844290, 2844290, 2844290, 2844290, 2844290, 2844290, 2844290, 2844290, 2844290, 2844290, 2844290, 2844290, 2844290, 2844290, 2844290, 2844290, 2845018, 2963991, 3082965, 3201938, 3320912, 3439885, 3558859, 3677832, 3796805, 3915779, 4034752, 4153726, 4272699, 4391673, 4510646];
-const B6_PAY = [5987978, 5987978, 5987978, 5987978, 5987978, 5987978, 5987978, 5987978, 5987978, 5987978, 6139710, 6573992, 6984548, 7395103, 7822564, 8266930, 8711295, 9237388, 9796786, 10369161, 10871813, 11326453, 11781092, 12235732, 12690371, 13145011, 13599650, 14054290, 14508929, 14963569, 15418208, 15872847, 16327487, 16782126, 17236766];
-const COMMON_PAY = [2214450, 11814450, 22819631, 31466836, 37981483, 44171773, 50296210, 56341621, 62294837, 68142685, 73772076, 78990225, 83923280, 88856335, 93992515, 99331822, 104671128, 110992431, 117713907, 124591320, 130630970, 136093719, 141556469, 147019219, 152481968, 157944718, 163407467, 168870217, 174332967, 179795716, 185258466, 190721216, 196183965, 201646715, 207109465];
-const ACAP_TOTAL = [27487124, 27487124, 26061943, 28140044, 29684510, 31544077, 33383862, 35199907, 36988257, 38744954, 40587758, 42731496, 45222510, 47713524, 50307109, 53003266, 55699422, 58891452, 62285554, 65758399, 68808931, 71686395, 74563860, 77441324, 80318789, 83196253, 86073717, 88951182, 91828646, 94706111, 97583575, 100461039, 103338504, 106215968, 109093433];
-const BK_TOTAL = [5627195, 5627195, 5627195, 5627195, 5627195, 5627195, 5627195, 5627195, 5627195, 5627195, 5627195, 5682172, 6037032, 6391892, 6761364, 7145448, 7529531, 7984255, 8467766, 8962493, 9396956, 9789920, 10182883, 10575847, 10968811, 11361774, 11754738, 12147701, 12540665, 12933629, 13326592, 13719556, 14112520, 14505483, 14898447];
-const A1_LIQ_PAID = [8048426, 8048426, 8048426, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-const NONCONV_B_LIQ = [27487124, 27487124, 20577918, 20577918, 18274850, 18274850, 18274850, 18274850, 18274850, 18274850, 12286871, 2844290, 2844290, 2844290, 2844290, 2844290, 2844290, 2844290, 2844290, 2844290, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-const B_LIQ_PAID = [27487124, 27487124, 20577918, 20577918, 18274850, 18274850, 18274850, 18274850, 18274850, 18274850, 12286871, 2844290, 2844290, 2844290, 2844290, 2844290, 2844290, 2844290, 2844290, 2844290, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-const RESIDUAL_POOL = [2214450, 11814450, 28303656, 45892082, 57675150, 67075150, 76375150, 85555150, 94595150, 103475150, 118163129, 136105710, 144605710, 153105710, 161955710, 171155710, 180355710, 189555710, 198755710, 207955710, 220000000, 229200000, 238400000, 247600000, 256800000, 266000000, 275200000, 284400000, 293600000, 302800000, 312000000, 321200000, 330400000, 339600000, 348800000];
-const RESIDUAL_SHARES = [832222, 832222, 1032222, 1213735, 1263735, 1263735, 1263735, 1263735, 1263735, 1263735, 1332997, 1433977, 1433977, 1433977, 1433977, 1433977, 1433977, 1421290, 1405177, 1389064, 1401573, 1401573, 1401573, 1401573, 1401573, 1401573, 1401573, 1401573, 1401573, 1401573, 1401573, 1401573, 1401573, 1401573, 1401573];
-const RES_PER_SHARE = [2.66, 14.2, 27.42, 37.81, 45.64, 53.08, 60.44, 67.7, 74.85, 81.88, 88.64, 94.91, 100.84, 106.77, 112.94, 119.36, 125.77, 133.37, 141.45, 149.71, 156.97, 163.53, 170.09, 176.66, 183.22, 189.79, 196.35, 202.91, 209.48, 216.04, 222.61, 229.17, 235.74, 242.3, 248.86];
-const WARRANT_PAY = [0, 0, 0, 1910533, 2306075, 2681923, 3053773, 3420825, 3782279, 4137336, 4479128, 4795952, 5095467, 5394981, 5706828, 6031008, 6355188, 5046941, 3073465, 840767, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-const A1_PAYOUT = [8048426, 8048426, 8048426, 4952587, 5977932, 6952226, 7916155, 8867647, 9804628, 10725025, 11611038, 12432327, 13208743, 13985160, 14793547, 15633905, 16474262, 17469176, 18527074, 19609515, 20560099, 21419885, 22279671, 23139457, 23999243, 24859029, 25718815, 26578601, 27438387, 28298173, 29157959, 30017745, 30877531, 31737317, 32597103];
-const FD_SHARES = [1452102, 1452102, 1452102, 1452102, 1452102, 1452102, 1452102, 1452102, 1452102, 1452102, 1452102, 1452102, 1452102, 1452102, 1452102, 1452102, 1452102, 1439415, 1423302, 1407189, 1401573, 1401573, 1401573, 1401573, 1401573, 1401573, 1401573, 1401573, 1401573, 1401573, 1401573, 1401573, 1401573, 1401573, 1401573];
-const CEO_EVS = [50000000, 60000000, 70000000, 80000000, 90000000, 100000000, 110000000, 120000000, 130000000, 140000000, 150000000, 160000000, 170000000, 180000000, 190000000, 200000000, 210000000, 220000000, 230000000, 240000000, 250000000, 260000000, 270000000, 280000000, 290000000, 300000000, 310000000, 320000000, 330000000, 340000000, 350000000, 360000000, 370000000, 380000000, 390000000, 400000000];
-const CEO_BONUS = [750000, 850000, 970000, 1130000, 1350000, 1650000, 2050000, 2570000, 3230000, 4050000, 5050000, 6250000, 7450000, 8650000, 9500000, 10000000, 10500000, 11000000, 11500000, 12000000, 12500000, 13000000, 13500000, 14000000, 14500000, 15000000, 15500000, 16000000, 16500000, 17000000, 17500000, 18000000, 18500000, 19000000, 19500000, 20000000];
-const CEO_PCT = [0.015, 0.0142, 0.0139, 0.0141, 0.015, 0.0165, 0.0186, 0.0214, 0.0248, 0.0289, 0.0337, 0.0391, 0.0438, 0.0481, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05];
+  // ── Rates & Fees ──
+  pikRate: 0.08,           // 8% annual PIK on liq prefs
+  debtRate: 0.14,          // 14% annual on BHC debt
+  feeRate: 0.03,           // 3% transaction fees
 
-// Tranche constants
-const TR = {
-  A1:{name:"Class A Series A-1 (BHC)",shares:130984,oip:26.68,inv:3494653,baseLiq:6989306,liq:8048426,lps:61.45,thEV:71885032},
-  B1:{name:"Series B-1",shares:200000,oip:15.00,inv:3000000,baseLiq:6000000,liq:6909206,lps:34.55,thEV:48359172},
-  B2:{name:"Series B-2",shares:50000,oip:20.00,inv:1000000,baseLiq:2000000,liq:2303069,lps:46.06,thEV:53336356},
-  B3:{name:"Series B-3",shares:26250,oip:40.00,inv:1050000,baseLiq:2100000,liq:2418222,lps:92.12,thEV:91784797},
-  B4:{name:"Series B-4",shares:74730,oip:40.81,inv:3050000,baseLiq:6100000,liq:7024359,lps:94.00,thEV:97950324},
-  B5:{name:"Series B-5",shares:18125,oip:68.14,inv:1235000,baseLiq:2470000,liq:2844290,lps:156.93,thEV:146141835},
-  B6:{name:"Series B-6",shares:69262,oip:37.54,inv:2600000,baseLiq:5200000,liq:5987978,lps:86.45,thEV:90636917}
+  // ── Liquidation Preference ──
+  liqPrefMultiple: 2.0,    // 2.0x OIP
+
+  // ── BHC Senior Debt ──
+  debtPrincipal: 10000000, // $10M principal
+
+  // ── BHC MOIC Ratchet ──
+  bhcBasis: 10000000,
+  moicTarget: 3.0,
+  maxBhcFdPct: 0.125,     // 12.5% FD cap
+  bhcExistingPrefShares: 130984,
+
+  // ── CEO SVPT ──
+  ceoMinEV: 50000000,
+  ceoStep: 10000000,
+  ceoFloor: 750000,
+  ceoCap: 0.05,
+  // Accelerating tier rates (step-ups: +0.2%, +0.4%, +0.6%... not constant)
+  ceoTierRates: [0.01,0.012,0.016,0.022,0.03,0.04,0.052,0.066,0.082,0.10,0.12],
+
+  // ── Share Counts (Post-Exchange, Pre-B6) ──
+  commonShares: 777334,
+  esopAllocated: 1500,
+  esopOptions: 37700,
+  esopAvailable: 16355,
+  otherWarrants: 833,
+
+  // ── Tranche Definitions ──
+  tranches: {
+    A1:{name:"Class A Series A-1 (BHC)",shares:130984,oip:26.68,inv:3494653,baseLiq:6989306,cls:"A"},
+    B1:{name:"Series B-1",shares:200000,oip:15.00,inv:3000000,baseLiq:6000000,cls:"B"},
+    B2:{name:"Series B-2",shares:50000,oip:20.00,inv:1000000,baseLiq:2000000,cls:"B"},
+    B3:{name:"Series B-3",shares:26250,oip:40.00,inv:1050000,baseLiq:2100000,cls:"B"},
+    B4:{name:"Series B-4",shares:74730,oip:40.79,inv:3048237,baseLiq:6096473,cls:"B"},
+    B5:{name:"Series B-5",shares:18125,oip:68.21,inv:1236306,baseLiq:2472613,cls:"B"},
+    B6:{name:"Series B-6",shares:69262,oip:37.53,inv:2599318,baseLiq:5198636,cls:"B"}
+  },
+  trancheKeys: ["A1","B1","B2","B3","B4","B5","B6"],
+  evs: []
 };
-const TR_KEYS = ['A1','B1','B2','B3','B4','B5','B6'];
-const TR_PAYOUTS = {A1:A1_PAYOUT, B1:B1_PAY, B2:B2_PAY, B3:B3_PAY, B4:B4_PAY, B5:B5_PAY, B6:B6_PAY};
+for(let e=50e6;e<=400e6;e+=10e6) CONFIG.evs.push(e);
 
-// Stakeholders
-const STK = [
-  {n:"Attain Capital Partners, LLC",t:"Investor",c:293125,a:0,b:7381,w:0,o:0},
+// ═══════════════════════════════════════════════════════════════
+// STAKEHOLDER HOLDINGS
+// ═══════════════════════════════════════════════════════════════
+// CURRENT: Post-Exchange 3/1/2026. ACAP = 0 common, 300,506 Pref B.
+// Excludes B-6 (69,262) and MOIC Warrant (50,529).
+const STK_CURRENT = [
+  {n:"Attain Capital Partners, LLC",t:"Investor",c:0,a:0,b:300506,w:0,o:0},
   {n:"Thiag Loganathan",t:"Founder",c:200000,a:0,b:0,w:0,o:0},
   {n:"Ganesh Venkataramani",t:"Founder",c:190000,a:0,b:0,w:0,o:0},
   {n:"TGV, LLC",t:"Founder",c:147972,a:0,b:7483,w:0,o:0},
@@ -348,305 +304,425 @@ const STK = [
   {n:"Balaji USA Business Lending, LLC",t:"Investor",c:2316,a:0,b:0,w:0,o:0},
   {n:"Chordia Investment LLC",t:"Investor",c:2316,a:0,b:0,w:0,o:0},
   {n:"Eileen A. Vinayak",t:"Investor",c:1920,a:0,b:0,w:0,o:0},
-  {n:"Michael Slarve",t:"Investor",c:1250,a:0,b:0,w:0,o:0},
+  {n:"Michael Slarve",t:"Investor",c:0,a:0,b:1250,w:0,o:0},
   {n:"A-One Investments LLC",t:"Investor",c:1158,a:0,b:0,w:0,o:0},
   {n:"Thiru Ranganathan",t:"Ex-Employee",c:0,a:0,b:0,w:833,o:0},
   {n:"Shehnaz Basha",t:"Investor",c:720,a:0,b:0,w:0,o:0},
   {n:"ESOP (available)",t:"ESOP",c:0,a:0,b:0,w:0,o:16355},
   {n:"ESOP (allocated)",t:"ESOP",c:1500,a:0,b:0,w:0,o:37700}
 ];
-STK.forEach(s=>{s.io=s.c+s.a+s.b;s.fd=s.io+s.w+s.o});
+STK_CURRENT.forEach(s=>{s.io=s.c+s.a+s.b;s.fd=s.io+s.w+s.o});
+
+// B-6 allocation (2024 Note Conv): ACAP 8658, BK 1732, TGV 8658, Levine 3463, Girish 3463, Sawant 34630, BHC 8658
+const B6_MAP={"Attain Capital Partners, LLC":8658,"BarronKent Ventures, LLC":1732,
+  "TGV, LLC":8658,"Boathouse Capital III LP":8658};
+
+// POST-CONVERSION: Current + B-6 (69,262) + MOIC Warrant (50,529 to BHC)
+const STK_POSTCONV = JSON.parse(JSON.stringify(STK_CURRENT));
+for(const s of STK_POSTCONV){ if(B6_MAP[s.n]) s.b += B6_MAP[s.n]; if(s.n==="Boathouse Capital III LP") s.w += 50529; }
+// Add new B-6 holders
+STK_POSTCONV.push({n:"Sagar Sawant",t:"Investor",c:0,a:0,b:34630,w:0,o:0});
+STK_POSTCONV.push({n:"Richard Levine",t:"Investor",c:0,a:0,b:3463,w:0,o:0});
+STK_POSTCONV.push({n:"Girish Chandrasekhar",t:"Investor",c:0,a:0,b:3463,w:0,o:0});
+STK_POSTCONV.forEach(s=>{s.io=s.c+s.a+s.b;s.fd=s.io+s.w+s.o});
 
 const ACAP_BASIS=11935000, BHC_BASIS=10000000, BK_BASIS=2050000;
 
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 // FORMATTING
-// ═══════════════════════════════════════════════
-const $=v=>v<0?`(${new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(-v)})`:new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(v);
+// ═══════════════════════════════════════════════════════════════
+const $=v=>v<0?`(${new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0}).format(-v)})`:new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0}).format(v);
 const $M=v=>`$${(v/1e6).toFixed(1)}M`;
-const N=v=>new Intl.NumberFormat('en-US').format(Math.round(v));
-const P=v=>(v*100).toFixed(2)+'%';
-const X=v=>v.toFixed(2)+'x';
+const N=v=>new Intl.NumberFormat("en-US").format(Math.round(v));
+const P=v=>(v*100).toFixed(2)+"%";
+const X=v=>v.toFixed(2)+"x";
 
-// ═══════════════════════════════════════════════
-// CHART REGISTRY
-// ═══════════════════════════════════════════════
-let charts = {};
-function destroyChart(id){if(charts[id]){charts[id].destroy();delete charts[id]}}
-const CC = {em:'#10B981',bl:'#3B82F6',pu:'#8B5CF6',am:'#F59E0B',rd:'#EF4444',cy:'#06B6D4',
-  grid:'#33415533',txt:'#94A3B8'};
+// ═══════════════════════════════════════════════════════════════
+// DATE-DRIVEN RECALCULATION ENGINE
+// ═══════════════════════════════════════════════════════════════
 
-// ═══════════════════════════════════════════════
-// INIT STATIC
-// ═══════════════════════════════════════════════
-function initStakeholders(){
-  const body=document.getElementById('stbody');
-  const sorted=[...STK].sort((a,b)=>b.fd-a.fd);
+/** YEARFRAC: US NASD 30/360 (Excel basis=0) */
+function yearfrac(d1, d2){
+  let y1=d1.getFullYear(),m1=d1.getMonth()+1,dd1=d1.getDate();
+  let y2=d2.getFullYear(),m2=d2.getMonth()+1,dd2=d2.getDate();
+  const isLeap=y=>(y%4===0&&y%100!==0)||y%400===0;
+  if(m1===2&&dd1===(isLeap(y1)?29:28)){dd1=30;if(m2===2&&dd2===(isLeap(y2)?29:28))dd2=30}
+  if(dd1===31)dd1=30;
+  if(dd1===30&&dd2===31)dd2=30;
+  return((y2-y1)*360+(m2-m1)*30+(dd2-dd1))/360;
+}
+
+/** CEO SVPT tiered bonus */
+function computeCEO(ev){
+  if(ev<CONFIG.ceoMinEV) return 0;
+  let bonus=0;
+  const rates=CONFIG.ceoTierRates;
+  for(let i=0;i<rates.length;i++){
+    const lo=CONFIG.ceoMinEV+i*CONFIG.ceoStep;
+    if(ev<=lo) break;
+    bonus+=Math.min(ev,lo+CONFIG.ceoStep-0.01)-lo;
+    bonus-=Math.min(ev,lo+CONFIG.ceoStep-0.01)-lo; // reset
+  }
+  // Redo correctly
+  bonus=0;
+  for(let i=0;i<rates.length;i++){
+    const lo=CONFIG.ceoMinEV+i*CONFIG.ceoStep;
+    const hi=lo+CONFIG.ceoStep;
+    if(ev<=lo) break;
+    const inTier=Math.min(ev,hi)-lo;
+    bonus+=inTier*rates[i];
+  }
+  const lastEnd=CONFIG.ceoMinEV+rates.length*CONFIG.ceoStep;
+  if(ev>lastEnd) bonus+=(ev-lastEnd)*rates[rates.length-1];
+  return Math.min(bonus+CONFIG.ceoFloor,ev*CONFIG.ceoCap);
+}
+
+/** MOIC warrant shares (12.5% FD cap) */
+function calcWarrantShares(bhcPreProceeds){
+  if(bhcPreProceeds/CONFIG.bhcBasis>=CONFIG.moicTarget) return 0;
+  let totalPref=0;
+  for(const k of CONFIG.trancheKeys) totalPref+=CONFIG.tranches[k].shares;
+  const fdPre=CONFIG.commonShares+CONFIG.esopAllocated+CONFIG.esopOptions+CONFIG.esopAvailable+CONFIG.otherWarrants+totalPref;
+  const mx=Math.round((CONFIG.maxBhcFdPct*fdPre-CONFIG.bhcExistingPrefShares)/(1-CONFIG.maxBhcFdPct));
+  return Math.max(0,mx);
+}
+
+/** Full waterfall for given EV and exit date */
+function computeWaterfall(ev, exitDate){
+  const yf=yearfrac(CONFIG.exchangeDate,exitDate);
+  const yfDebt=yearfrac(CONFIG.debtStartDate,exitDate);
+  const pikFactor=Math.pow(1+CONFIG.pikRate,yf);
+
+  const trD={};
+  for(const k of CONFIG.trancheKeys){
+    const t=CONFIG.tranches[k];
+    trD[k]={...t,liqPref:t.baseLiq*pikFactor,lps:t.baseLiq*pikFactor/t.shares};
+  }
+
+  const fees=ev*CONFIG.feeRate;
+  const ceo=computeCEO(ev);
+  const debt=CONFIG.debtPrincipal;
+  const eqAvail=ev-fees-ceo-debt;
+
+  if(eqAvail<=0){
+    const r={ev,fees,ceo,debt,eqAvail,a1Liq:0,bLiq:0,totLiq:0,resPool:0,resShares:0,rps:0,
+      conv:{},trD,trPay:{},wShares:0,wPay:0,bhcEq:0,bhcTot:debt+debt*CONFIG.debtRate*yfDebt,acapTot:0,bkTot:0,
+      comPay:0,pikFactor,yf,yfDebt,debtInt:debt*CONFIG.debtRate*yfDebt};
+    for(const k of CONFIG.trancheKeys){r.conv[k]=false;r.trPay[k]=0}
+    return r;
+  }
+
+  const baseRes=CONFIG.commonShares+CONFIG.esopAllocated+CONFIG.esopOptions+CONFIG.esopAvailable+CONFIG.otherWarrants;
+  let conv={};
+  for(const k of CONFIG.trancheKeys) conv[k]=false;
+  let wSh=0;
+
+  for(let it=0;it<20;it++){
+    let chg=false;
+    let a1L=conv.A1?0:trD.A1.liqPref;
+    let bL=0;
+    for(const k of CONFIG.trancheKeys){if(k!=="A1"&&!conv[k]) bL+=trD[k].liqPref}
+    const rPool=Math.max(0,eqAvail-a1L-bL);
+    let rSh=baseRes+wSh;
+    for(const k of CONFIG.trancheKeys){if(conv[k]) rSh+=trD[k].shares}
+    const rps=rSh>0?rPool/rSh:0;
+    for(const k of CONFIG.trancheKeys){
+      const sc=trD[k].shares*rps>trD[k].liqPref;
+      if(sc!==conv[k]){conv[k]=sc;chg=true}
+    }
+    const a1P=conv.A1?trD.A1.shares*rps:trD.A1.liqPref;
+    const nw=calcWarrantShares(debt+debt*CONFIG.debtRate*yfDebt+a1P);
+    if(nw!==wSh){wSh=nw;chg=true}
+    if(!chg) break;
+  }
+
+  let a1L=conv.A1?0:trD.A1.liqPref;
+  let bL=0;
+  for(const k of CONFIG.trancheKeys){if(k!=="A1"&&!conv[k]) bL+=trD[k].liqPref}
+  const resPool=Math.max(0,eqAvail-a1L-bL);
+  let resSh=baseRes+wSh;
+  for(const k of CONFIG.trancheKeys){if(conv[k]) resSh+=trD[k].shares}
+  const rps=resSh>0?resPool/resSh:0;
+
+  const trPay={};
+  for(const k of CONFIG.trancheKeys) trPay[k]=conv[k]?trD[k].shares*rps:trD[k].liqPref;
+
+  const wPay=wSh*rps;
+  const bhcEq=trPay.A1+wPay;
+  const debtInt=debt*CONFIG.debtRate*yfDebt; const bhcTot=debt+debtInt+bhcEq;
+
+  const acTr={B1:200000,B2:50000,B3:25000,B4:7381,B5:18125,B6:8658};
+  let acapTot=0;
+  for(const [tk,sh] of Object.entries(acTr)) acapTot+=trPay[tk]*(sh/CONFIG.tranches[tk].shares);
+
+  const bkTr={B4:59866,B6:1732};
+  let bkTot=0;
+  for(const [tk,sh] of Object.entries(bkTr)) bkTot+=trPay[tk]*(sh/CONFIG.tranches[tk].shares);
+
+  return {ev,fees,ceo,debt,eqAvail,a1Liq:a1L,bLiq:bL,totLiq:a1L+bL,resPool,resShares:resSh,rps,
+    conv,trD,trPay,wShares:wSh,wPay,bhcEq,bhcTot,acapTot,bkTot,
+    comPay:CONFIG.commonShares*rps,pikFactor,yf,yfDebt,debtInt:debt*CONFIG.debtRate*yfDebt};
+}
+
+function computeAllEVs(exitDate){return CONFIG.evs.map(ev=>computeWaterfall(ev,exitDate))}
+
+// ═══════════════════════════════════════════════════════════════
+// CHART REGISTRY & COLORS
+// ═══════════════════════════════════════════════════════════════
+let charts={};
+function dc(id){if(charts[id]){charts[id].destroy();delete charts[id]}}
+const CC={em:"#10B981",bl:"#3B82F6",pu:"#8B5CF6",am:"#F59E0B",rd:"#EF4444",cy:"#06B6D4",grid:"#33415533",txt:"#94A3B8"};
+
+// ═══════════════════════════════════════════════════════════════
+// CAP TABLE TABS
+// ═══════════════════════════════════════════════════════════════
+let capTab="current";
+function switchCapTab(m){
+  capTab=m;
+  document.querySelectorAll("#capTabs .tab-btn").forEach(b=>b.classList.remove("active"));
+  document.querySelectorAll("#capTabs .tab-btn")[m==="current"?0:1].classList.add("active");
+  renderCapTable();
+}
+function renderCapTable(){
+  const cur=capTab==="current";
+  const stk=cur?STK_CURRENT:STK_POSTCONV;
+  const tIO=stk.reduce((s,x)=>s+x.io,0);
+  const tFD=stk.reduce((s,x)=>s+x.fd,0);
+  document.getElementById("capTabInfo").innerHTML=cur
+    ?"<b>Post-Exchange (3/1/2026)</b>: Excludes B-6 (69,262) and MOIC Warrant (50,529). I&amp;O: "+N(tIO)+" &middot; FD: "+N(tFD)
+    :"<b>Post-Conversion</b>: Includes B-6 (69,262) + MOIC Warrant (50,529 at 12.5% FD cap). I&amp;O: "+N(tIO)+" &middot; FD: "+N(tFD);
+  document.getElementById("pieIOLabel").textContent="Issued & Outstanding \u2014 "+N(tIO);
+  document.getElementById("pieFDLabel").textContent="Fully Diluted \u2014 "+N(tFD);
+  const cIO=stk.reduce((s,x)=>s+x.c,0),aIO=stk.reduce((s,x)=>s+x.a,0),bIO=stk.reduce((s,x)=>s+x.b,0);
+  const wT=stk.reduce((s,x)=>s+x.w,0),oT=stk.reduce((s,x)=>s+x.o,0);
+  const pc=["#10B981","#3B82F6","#8B5CF6","#F59E0B","#EF4444","#06B6D4"];
+  const lo={plugins:{legend:{position:"bottom",labels:{color:"#94A3B8",padding:10,font:{size:10}}}}};
+  dc("pieIO");
+  charts.pieIO=new Chart(document.getElementById("pieIO"),{type:"doughnut",data:{
+    labels:["Common "+(cIO/tIO*100).toFixed(1)+"%","Pref A "+(aIO/tIO*100).toFixed(1)+"%","Pref B "+(bIO/tIO*100).toFixed(1)+"%"],
+    datasets:[{data:[cIO,aIO,bIO],backgroundColor:pc.slice(0,3),borderWidth:0}]},options:lo});
+  dc("pieFD");
+  const fdL=["Common "+(cIO/tFD*100).toFixed(1)+"%","Pref A "+(aIO/tFD*100).toFixed(1)+"%","Pref B "+(bIO/tFD*100).toFixed(1)+"%"];
+  const fdD=[cIO,aIO,bIO];
+  if(oT>0){fdL.push("ESOP "+(oT/tFD*100).toFixed(1)+"%");fdD.push(oT)}
+  if(wT>0){fdL.push("Warrants "+(wT/tFD*100).toFixed(1)+"%");fdD.push(wT)}
+  charts.pieFD=new Chart(document.getElementById("pieFD"),{type:"doughnut",data:{
+    labels:fdL,datasets:[{data:fdD,backgroundColor:pc.slice(0,fdD.length),borderWidth:0}]},options:lo});
+  const body=document.getElementById("stbody");
+  const sorted=[...stk].sort((a,b)=>b.fd-a.fd);
   body.innerHTML=sorted.map(s=>`<tr>
     <td class="text-sm whitespace-nowrap">${s.n}</td><td class="text-xs text-slate-400">${s.t}</td>
-    <td class="num mono">${s.c?N(s.c):'—'}</td><td class="num mono">${s.a?N(s.a):'—'}</td>
-    <td class="num mono">${s.b?N(s.b):'—'}</td><td class="num mono">${N(s.io)}</td>
-    <td class="num mono font-medium">${N(s.fd)}</td><td class="num mono">${(s.fd/1452102*100).toFixed(2)}%</td>
-  </tr>`).join('');
+    <td class="num mono">${s.c?N(s.c):"\u2014"}</td><td class="num mono">${s.a?N(s.a):"\u2014"}</td>
+    <td class="num mono">${s.b?N(s.b):"\u2014"}</td><td class="num mono">${N(s.io)}</td>
+    <td class="num mono font-medium">${N(s.fd)}</td><td class="num mono">${(s.fd/tFD*100).toFixed(2)}%</td></tr>`).join("");
 }
 
-function initPies(){
-  const pc=['#10B981','#3B82F6','#8B5CF6','#F59E0B','#EF4444','#06B6D4'];
-  const lo={plugins:{legend:{position:'bottom',labels:{color:'#94A3B8',padding:10,font:{size:10}}}}};
-  new Chart(document.getElementById('pieIO'),{type:'doughnut',data:{
-    labels:['Common 57.7%','Pref A (BHC) 9.7%','Pref B 32.6%'],
-    datasets:[{data:[777334,130984,438367],backgroundColor:pc.slice(0,3),borderWidth:0}]},options:lo});
-  new Chart(document.getElementById('pieFD'),{type:'doughnut',data:{
-    labels:['Common 53.5%','Pref A 9.0%','Pref B 30.2%','ESOP 3.7%','Warrants 0.1%','MOIC Warrant 3.5%'],
-    datasets:[{data:[777334,130984,438367,54055,833,50529],backgroundColor:pc,borderWidth:0}]},options:lo});
-}
-
+// ═══════════════════════════════════════════════════════════════
+// STATIC INIT
+// ═══════════════════════════════════════════════════════════════
 function initTrCards(){
-  const el=document.getElementById('trCards');
-  el.innerHTML=TR_KEYS.map(k=>{const t=TR[k];return`
+  document.getElementById("trCards").innerHTML=CONFIG.trancheKeys.map(k=>{const t=CONFIG.tranches[k];return`
     <div class="card-sm"><div class="flex justify-between mb-2"><h4 class="font-semibold text-sm">${t.name}</h4><span class="text-xs text-slate-500">${k}</span></div>
     <div class="grid grid-cols-2 gap-y-1 text-xs">
       <div class="text-slate-400">Shares</div><div class="mono text-right">${N(t.shares)}</div>
       <div class="text-slate-400">OIP</div><div class="mono text-right">${$(t.oip)}</div>
       <div class="text-slate-400">Investment</div><div class="mono text-right">${$(t.inv)}</div>
       <div class="text-slate-400">Base Liq Pref</div><div class="mono text-right">${$(t.baseLiq)}</div>
-      <div class="text-slate-400">Total Liq Pref</div><div class="mono text-right">${$(t.liq)}</div>
-      <div class="text-slate-400">Liq/Share</div><div class="mono text-right">${$(t.lps)}</div>
-      <div class="text-slate-400 col-span-2 mt-1">Conv Threshold: <span class="mono">${$M(t.thEV)}</span></div>
-    </div>
-    <div class="mt-2 text-center" id="tb-${k}"></div></div>`}).join('');
+      <div class="text-slate-400 col-span-2 mt-1">Liq Pref w/ PIK: <span class="mono" id="trlp-${k}">\u2014</span></div>
+    </div><div class="mt-2 text-center" id="tb-${k}"></div></div>`}).join("");
 }
-
-function initDebtChart(){
-  const yrs=['Apr 2023','Dec 2023','Dec 2024','Dec 2025','Dec 2026','Dec 2027'];
-  const mo=[0,8,20,32,44,56];
-  charts.debt=new Chart(document.getElementById('debtChart'),{type:'bar',data:{labels:yrs,datasets:[
-    {label:'Principal',data:mo.map(()=>10e6),backgroundColor:CC.bl+'88',stack:'a'},
-    {label:'Accrued Interest',data:mo.map(m=>10e6*.14*m/12),backgroundColor:CC.am+'88',stack:'a'}
-  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:CC.txt}}},
-    scales:{x:{ticks:{color:CC.txt},grid:{color:CC.grid}},y:{ticks:{color:CC.txt,callback:v=>$M(v)},grid:{color:CC.grid}}}}});
-}
-
 function initCEOTable(){
-  const el=document.getElementById('ceoTbl');
-  el.innerHTML=CEO_EVS.map((ev,i)=>{
-    const hl=i%2===0?'':'style="background:rgba(51,65,85,.15)"';
-    return`<tr ${hl}><td class="mono">${$M(ev)}</td><td class="num mono font-medium">${$(CEO_BONUS[i])}</td><td class="num mono">${(CEO_PCT[i]*100).toFixed(2)}%</td></tr>`;
-  }).join('');
+  document.getElementById("ceoTbl").innerHTML=CONFIG.evs.map((ev,i)=>{
+    const b=computeCEO(ev);const p=ev>0?b/ev:0;
+    return`<tr ${i%2?"style=\"background:rgba(51,65,85,.15)\"":""}><td class="mono">${$M(ev)}</td><td class="num mono font-medium">${$(b)}</td><td class="num mono">${(p*100).toFixed(2)}%</td></tr>`;
+  }).join("");
 }
 
-// ═══════════════════════════════════════════════
-// DYNAMIC UPDATE
-// ═══════════════════════════════════════════════
-function update(idx){
-  const ev=EVS[idx], fee=FEES[idx], ceo=CEO_BONUS[idx]||0;
-  // For CEO: map EV to CEO sensitivity index
-  const ceoIdx=CEO_EVS.findIndex(e=>e===ev);
-  const ceoVal=ceoIdx>=0?CEO_BONUS[ceoIdx]:0;
-  const ceoPctVal=ceoIdx>=0?CEO_PCT[ceoIdx]:0;
-  
-  const totalPrefPaid=A1_LIQ_PAID[idx]+B_LIQ_PAID[idx];
-  const eqAvail=ev-fee-1500000-ceoVal-10000000; // fees+expenses+ceo+debt
-  
-  // KPIs
-  document.getElementById('evDisp').textContent=$(ev);
-  document.getElementById('k_ev').textContent=$M(ev);
-  document.getElementById('k_fd').textContent=N(FD_SHARES[idx]);
-  document.getElementById('k_eq').textContent=$(eqAvail);
-  document.getElementById('k_rps').textContent='$'+RES_PER_SHARE[idx].toFixed(2);
-  document.getElementById('k_fee').textContent=$(fee+1500000);
-  document.getElementById('k_ceo').textContent=$(ceoVal);
-  document.getElementById('k_debt').textContent=$(10000000);
-  document.getElementById('k_pref').textContent=$(totalPrefPaid);
-  
-  // Priority steps
-  const steps=[
-    {l:'Transaction Fees (3%)',a:fee},{l:'Additional Expenses',a:1500000},
-    {l:'CEO SVPT Phantom Equity',a:ceoVal},{l:'BHC Senior Debt',a:10000000},
-    {l:'Preferred Liq Pref (A-1)',a:A1_LIQ_PAID[idx]},{l:'Preferred Liq Pref (B-Series)',a:B_LIQ_PAID[idx]},
-    {l:'→ Residual Pool',a:RESIDUAL_POOL[idx]}
-  ];
-  document.getElementById('steps').innerHTML=steps.map((s,i)=>{
-    const cls=s.a>0?'on':'off';
-    const bg=i<6?'rgba(239,68,68,.15)':'rgba(16,185,129,.15)';
-    const fg=i<6?CC.rd:CC.em;
-    return`<div class="step ${cls}"><div class="step-n" style="background:${bg};color:${fg}">${i+1}</div>
+// ═══════════════════════════════════════════════════════════════
+// MAIN UPDATE
+// ═══════════════════════════════════════════════════════════════
+const EV_STEPS=[50e6,60e6,70e6,80e6,90e6,100e6,110e6,120e6,130e6,140e6,150e6,160e6,170e6,180e6,190e6,200e6,210e6,220e6,230e6,240e6,250e6,260e6,270e6,280e6,290e6,300e6,310e6,320e6,330e6,340e6,350e6,360e6,370e6,380e6,390e6,400e6];
+
+function getExitDate(){const v=document.getElementById("exitDatePicker").value;const[y,m,d]=v.split("-").map(Number);return new Date(y,m-1,d)}
+function getEV(){return EV_STEPS[parseInt(document.getElementById("evSlider").value)]||90e6}
+
+function update(){
+  const ev=getEV(),exitDate=getExitDate();
+  const w=computeWaterfall(ev,exitDate);
+
+  document.getElementById("pikInfo").textContent="PIK: "+w.yf.toFixed(2)+" yrs \u00b7 Factor: "+w.pikFactor.toFixed(4)+"x";
+  document.getElementById("evDisp").textContent=$(ev);
+  document.getElementById("k_ev").textContent=$M(ev);
+  document.getElementById("k_fd").textContent=N(w.resShares);
+  document.getElementById("k_eq").textContent=$(w.eqAvail);
+  document.getElementById("k_rps").textContent="$"+w.rps.toFixed(2);
+  document.getElementById("k_fee").textContent=$(w.fees);
+  document.getElementById("k_ceo").textContent=$(w.ceo);
+  document.getElementById("k_debt").textContent=$(w.debt);
+  document.getElementById("k_pref").textContent=$(w.totLiq);
+  document.getElementById("debtInterest").textContent=$(w.debtInt);
+  document.getElementById("debtTotal").textContent=$(w.debt+w.debtInt);
+
+  // Steps
+  const steps=[{l:"Transaction Fees (3%)",a:w.fees},{l:"CEO SVPT Phantom Equity",a:w.ceo},
+    {l:"BHC Senior Debt (Principal)",a:w.debt},{l:"Preferred Liq Pref (A-1)",a:w.a1Liq},
+    {l:"Preferred Liq Pref (B-Series)",a:w.bLiq},{l:"\u2192 Residual Pool",a:w.resPool}];
+  document.getElementById("steps").innerHTML=steps.map((s,i)=>{
+    const on=s.a>0?"on":"off";const bg=i<5?"rgba(239,68,68,.15)":"rgba(16,185,129,.15)";const fg=i<5?CC.rd:CC.em;
+    return`<div class="step ${on}"><div class="step-n" style="background:${bg};color:${fg}">${i+1}</div>
     <div class="flex-1"><div class="text-sm">${s.l}</div><div class="mono text-xs text-slate-400">${$(s.a)}</div></div></div>`;
-  }).join('');
-  
-  // Mini waterfall
-  updateMiniWF(idx,ev,fee,ceoVal);
-  
-  // Tranche conversion
-  const rps=RES_PER_SHARE[idx];
-  document.getElementById('tconv').innerHTML=TR_KEYS.map(k=>{
-    const t=TR[k],pay=TR_PAYOUTS[k][idx];
-    const conv=ev>=t.thEV;
-    const asConv=t.shares*rps;
+  }).join("");
+
+  // Tranche table
+  document.getElementById("tconv").innerHTML=CONFIG.trancheKeys.map(k=>{
+    const t=w.trD[k],pay=w.trPay[k],cv=w.conv[k],ac=t.shares*w.rps;
     return`<tr><td class="text-sm font-medium">${t.name}</td><td class="num mono">${N(t.shares)}</td>
-    <td class="num mono">${$(t.liq)}</td><td class="num mono">${$(asConv)}</td>
-    <td class="text-center">${conv?'<span class="badge-g">CONVERTS</span>':'<span class="badge-r">LIQ PREF</span>'}</td>
+    <td class="num mono">${$(t.liqPref)}</td><td class="num mono">${$(ac)}</td>
+    <td class="text-center">${cv?'<span class="badge-g">CONVERTS</span>':'<span class="badge-r">LIQ PREF</span>'}</td>
     <td class="num mono font-semibold">${$(pay)}</td></tr>`;
-  }).join('');
-  
-  // Tranche badges
-  TR_KEYS.forEach(k=>{const el=document.getElementById('tb-'+k);
-    if(el)el.innerHTML=ev>=TR[k].thEV?'<span class="badge-g">CONVERTS</span>':'<span class="badge-r">LIQ PREF</span>'});
-  
-  // Proceeds
-  const invs=[
-    {n:'Boathouse Capital (BHC)',basis:BHC_BASIS,proc:BHC_TOTAL[idx]},
-    {n:'ACAP (All B-Series)',basis:ACAP_BASIS,proc:ACAP_TOTAL[idx]},
-    {n:'BarronKent Ventures',basis:BK_BASIS,proc:BK_TOTAL[idx]}
-  ];
-  document.getElementById('proctbl').innerHTML=invs.map(v=>{
-    const moic=v.proc/v.basis,gain=v.proc-v.basis;
+  }).join("");
+  CONFIG.trancheKeys.forEach(k=>{
+    const el=document.getElementById("tb-"+k);if(el)el.innerHTML=w.conv[k]?'<span class="badge-g">CONVERTS</span>':'<span class="badge-r">LIQ PREF</span>';
+    const lp=document.getElementById("trlp-"+k);if(lp)lp.textContent=$(w.trD[k].liqPref);
+  });
+
+  // Investor proceeds
+  const invs=[{n:"Boathouse Capital (BHC)",basis:BHC_BASIS,proc:w.bhcTot},
+    {n:"ACAP (All B-Series)",basis:ACAP_BASIS,proc:w.acapTot},
+    {n:"BarronKent Ventures",basis:BK_BASIS,proc:w.bkTot}];
+  document.getElementById("proctbl").innerHTML=invs.map(v=>{
+    const m=v.proc/v.basis,g=v.proc-v.basis;
     return`<tr><td class="text-sm font-medium">${v.n}</td><td class="num mono">${$(v.basis)}</td>
-    <td class="num mono font-semibold">${$(v.proc)}</td><td class="num mono">${X(moic)}</td>
-    <td class="num mono ${gain>=0?'text-emerald-400':'text-red-400'}">${$(gain)}</td></tr>`;
-  }).join('');
-  
-  // Investor cards
-  document.getElementById('invCards').innerHTML=invs.map((v,i)=>{
-    const moic=v.proc/v.basis;
-    const colors=[CC.bl,CC.em,CC.pu];
+    <td class="num mono font-semibold">${$(v.proc)}</td><td class="num mono">${X(m)}</td>
+    <td class="num mono ${g>=0?"text-emerald-400":"text-red-400"}">${$(g)}</td></tr>`;
+  }).join("");
+  document.getElementById("invCards").innerHTML=invs.map((v,i)=>{
+    const m=v.proc/v.basis;const colors=[CC.bl,CC.em,CC.pu];
     return`<div class="card"><div class="text-xs text-slate-400 mb-1">${v.n}</div>
-    <div class="mono text-2xl font-bold" style="color:${colors[i]}">${X(moic)}</div>
+    <div class="mono text-2xl font-bold" style="color:${colors[i]}">${X(m)}</div>
     <div class="mono text-sm text-slate-300">${$(v.proc)}</div>
     <div class="text-xs text-slate-500 mt-1">Basis: ${$(v.basis)}</div></div>`;
-  }).join('');
-  
-  // Warrant info
-  const bhcMoic=BHC_TOTAL[idx]/BHC_BASIS;
-  const wShares=WARRANT_PAY[idx]>0?50529:0;
-  document.getElementById('wInfo').innerHTML=`<div class="space-y-3 text-sm">
-    <div class="flex justify-between"><span class="text-slate-400">BHC MOIC</span><span class="mono font-semibold ${bhcMoic<3?'text-amber-400':'text-emerald-400'}">${X(bhcMoic)}</span></div>
-    <div class="flex justify-between"><span class="text-slate-400">Target MOIC</span><span class="mono">3.00x</span></div>
-    <div class="flex justify-between"><span class="text-slate-400">Warrant Shares</span><span class="mono font-semibold">${N(wShares)}</span></div>
-    <div class="flex justify-between"><span class="text-slate-400">Max Shares (12.5% cap)</span><span class="mono">${N(50529)}</span></div>
-    <div class="flex justify-between"><span class="text-slate-400">Warrant Proceeds</span><span class="mono">${$(WARRANT_PAY[idx])}</span></div>
-    ${wShares>0?'<div class="p-2 rounded text-xs" style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);color:#F59E0B">⚠️ Ratchet ACTIVE — 50,529 warrant shares issued (cap binding at all EVs)</div>':'<div class="p-2 rounded text-xs" style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);color:#10B981">✓ No warrant needed</div>'}
+  }).join("");
+
+  // Warrant
+  const bM=w.bhcTot/BHC_BASIS;
+  document.getElementById("wInfo").innerHTML=`<div class="space-y-3 text-sm">
+    <div class="flex justify-between"><span class="text-slate-400">BHC MOIC</span><span class="mono font-semibold ${bM<3?"text-amber-400":"text-emerald-400"}">${X(bM)}</span></div>
+    <div class="flex justify-between"><span class="text-slate-400">Target</span><span class="mono">3.00x</span></div>
+    <div class="flex justify-between"><span class="text-slate-400">Warrant Shares</span><span class="mono font-semibold">${N(w.wShares)}</span></div>
+    <div class="flex justify-between"><span class="text-slate-400">Warrant Proceeds</span><span class="mono">${$(w.wPay)}</span></div>
+    ${w.wShares>0?'<div class="p-2 rounded text-xs" style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);color:#F59E0B">\u26a0\ufe0f Ratchet ACTIVE \u2014 '+N(w.wShares)+' shares</div>':'<div class="p-2 rounded text-xs" style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);color:#10B981">\u2713 No warrant needed</div>'}
   </div>`;
-  
-  // CEO callout
-  document.getElementById('ceoCta').textContent=`${$(ceoVal)} (${(ceoPctVal*100).toFixed(2)}% of EV)`;
-  
-  // Charts
-  updateWFChart(idx);
-  updateMOICChart(idx);
-  updateDollarChart();
-  updateWarrantChart(idx);
-  updateCEOChart(idx);
+  const cp=ev>0?w.ceo/ev:0;
+  document.getElementById("ceoCta").textContent=`${$(w.ceo)} (${(cp*100).toFixed(2)}% of EV)`;
+
+  updateCharts(w,exitDate);
 }
 
-function updateMiniWF(idx,ev,fee,ceo){
-  destroyChart('mini');
-  const labels=['EV','Fees+Exp','CEO','Debt','Pref Liq','Residual'];
-  const vals=[ev,-(fee+1500000),-ceo,-10000000,-(A1_LIQ_PAID[idx]+B_LIQ_PAID[idx]),RESIDUAL_POOL[idx]];
-  let run=0;const bases=[],heights=[],colors=[];
-  vals.forEach((v,i)=>{
-    if(i===0){bases.push(0);heights.push(v);colors.push(CC.em);run=v}
-    else if(i===5){bases.push(0);heights.push(v);colors.push(CC.bl)}
-    else{run+=v;bases.push(run);heights.push(-v);colors.push(CC.rd+'88')}
-  });
-  charts.mini=new Chart(document.getElementById('miniWF'),{type:'bar',data:{labels,datasets:[
-    {data:bases,backgroundColor:'transparent',borderWidth:0,stack:'a'},
-    {data:heights,backgroundColor:colors,stack:'a',borderRadius:4}
-  ]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},
-    tooltip:{callbacks:{label:c=>$(vals[c.dataIndex])}}},
+// ═══════════════════════════════════════════════════════════════
+// CHARTS
+// ═══════════════════════════════════════════════════════════════
+function updateCharts(w,exitDate){
+  const all=computeAllEVs(exitDate);
+  const ai=CONFIG.evs.indexOf(w.ev);
+  const lbls=CONFIG.evs.map(e=>$M(e));
+
+  // Mini waterfall
+  dc("mini");
+  const mL=["EV","Fees","CEO","Debt","Pref Liq","Residual"];
+  const mV=[w.ev,-w.fees,-w.ceo,-w.debt,-w.totLiq,w.resPool];
+  let run=0;const mB=[],mH=[],mC=[];
+  mV.forEach((v,i)=>{if(i===0){mB.push(0);mH.push(v);mC.push(CC.em);run=v}
+    else if(i===5){mB.push(0);mH.push(v);mC.push(CC.bl)}
+    else{run+=v;mB.push(run);mH.push(-v);mC.push(CC.rd+"88")}});
+  charts.mini=new Chart(document.getElementById("miniWF"),{type:"bar",data:{labels:mL,datasets:[
+    {data:mB,backgroundColor:"transparent",borderWidth:0,stack:"a"},
+    {data:mH,backgroundColor:mC,stack:"a",borderRadius:4}
+  ]},options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},
+    tooltip:{callbacks:{label:c=>$(mV[c.dataIndex])}}},
     scales:{x:{stacked:true,ticks:{color:CC.txt,callback:v=>$M(v)},grid:{color:CC.grid}},
     y:{stacked:true,ticks:{color:CC.txt,font:{size:11}},grid:{display:false}}}}});
-}
 
-function updateWFChart(idx){
-  destroyChart('wf');
-  const ev=EVS[idx],fee=FEES[idx],ceo=CEO_BONUS[idx]||0;
-  const ceoIdx=CEO_EVS.findIndex(e=>e===ev);
-  const ceoVal=ceoIdx>=0?CEO_BONUS[ceoIdx]:0;
-  const labels=['EV','Fees+Exp','CEO','Debt','A-1 Liq','B Liq','= Residual'];
-  const vals=[ev,-(fee+1500000),-ceoVal,-10000000,-A1_LIQ_PAID[idx],-B_LIQ_PAID[idx],RESIDUAL_POOL[idx]];
-  let run=0;const bases=[],heights=[],colors=[];
-  vals.forEach((v,i)=>{
-    if(i===0){bases.push(0);heights.push(v);colors.push(CC.em);run=v}
-    else if(i===6){bases.push(0);heights.push(v);colors.push(CC.bl)}
-    else{run+=v;bases.push(run);heights.push(-v);colors.push(CC.rd+'77')}
-  });
-  charts.wf=new Chart(document.getElementById('wfChart'),{type:'bar',data:{labels,datasets:[
-    {data:bases,backgroundColor:'transparent',borderWidth:0,stack:'a'},
-    {data:heights,backgroundColor:colors,stack:'a',borderRadius:6}
+  // Waterfall chart
+  dc("wf");
+  const wL=["EV","Fees","CEO","Debt","A-1 Liq","B Liq","= Residual"];
+  const wV=[w.ev,-w.fees,-w.ceo,-w.debt,-w.a1Liq,-w.bLiq,w.resPool];
+  run=0;const wB=[],wH=[],wC=[];
+  wV.forEach((v,i)=>{if(i===0){wB.push(0);wH.push(v);wC.push(CC.em);run=v}
+    else if(i===6){wB.push(0);wH.push(v);wC.push(CC.bl)}
+    else{run+=v;wB.push(run);wH.push(-v);wC.push(CC.rd+"77")}});
+  charts.wf=new Chart(document.getElementById("wfChart"),{type:"bar",data:{labels:wL,datasets:[
+    {data:wB,backgroundColor:"transparent",borderWidth:0,stack:"a"},
+    {data:wH,backgroundColor:wC,stack:"a",borderRadius:6}
   ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},
-    title:{display:true,text:'Waterfall at '+$M(ev),color:CC.txt},
-    tooltip:{callbacks:{label:c=>$(vals[c.dataIndex])}}},
+    title:{display:true,text:"Waterfall at "+$M(w.ev),color:CC.txt},
+    tooltip:{callbacks:{label:c=>$(wV[c.dataIndex])}}},
     scales:{x:{stacked:true,ticks:{color:CC.txt},grid:{display:false}},
     y:{stacked:true,ticks:{color:CC.txt,callback:v=>$M(v)},grid:{color:CC.grid}}}}});
-}
 
-function updateMOICChart(activeIdx){
-  destroyChart('moic');
-  const lbls=EVS.map(e=>$M(e));
-  const bhcM=EVS.map((_,i)=>BHC_TOTAL[i]/BHC_BASIS);
-  const acM=EVS.map((_,i)=>ACAP_TOTAL[i]/ACAP_BASIS);
-  const bkM=EVS.map((_,i)=>BK_TOTAL[i]/BK_BASIS);
-  charts.moic=new Chart(document.getElementById('moicLine'),{type:'line',data:{labels:lbls,datasets:[
-    {label:'BHC',data:bhcM,borderColor:CC.bl,tension:.3,pointRadius:EVS.map((_,i)=>i===activeIdx?6:1.5),pointBackgroundColor:EVS.map((_,i)=>i===activeIdx?CC.bl:'transparent')},
-    {label:'ACAP',data:acM,borderColor:CC.em,tension:.3,pointRadius:EVS.map((_,i)=>i===activeIdx?6:1.5),pointBackgroundColor:EVS.map((_,i)=>i===activeIdx?CC.em:'transparent')},
-    {label:'BarronKent',data:bkM,borderColor:CC.pu,tension:.3,pointRadius:EVS.map((_,i)=>i===activeIdx?6:1.5),pointBackgroundColor:EVS.map((_,i)=>i===activeIdx?CC.pu:'transparent')}
+  // MOIC
+  dc("moic");
+  charts.moic=new Chart(document.getElementById("moicLine"),{type:"line",data:{labels:lbls,datasets:[
+    {label:"BHC",data:all.map(r=>r.bhcTot/BHC_BASIS),borderColor:CC.bl,tension:.3,pointRadius:CONFIG.evs.map((_,i)=>i===ai?6:1.5)},
+    {label:"ACAP",data:all.map(r=>r.acapTot/ACAP_BASIS),borderColor:CC.em,tension:.3,pointRadius:CONFIG.evs.map((_,i)=>i===ai?6:1.5)},
+    {label:"BarronKent",data:all.map(r=>r.bkTot/BK_BASIS),borderColor:CC.pu,tension:.3,pointRadius:CONFIG.evs.map((_,i)=>i===ai?6:1.5)}
   ]},options:{responsive:true,maintainAspectRatio:false,
-    plugins:{legend:{position:'top',labels:{color:CC.txt}},title:{display:true,text:'MOIC by Exit EV',color:CC.txt}},
-    scales:{x:{ticks:{color:CC.txt,maxTicksLimit:8},grid:{color:CC.grid}},
-    y:{ticks:{color:CC.txt,callback:v=>v.toFixed(1)+'x'},grid:{color:CC.grid}}}}});
-}
+    plugins:{legend:{position:"top",labels:{color:CC.txt}},title:{display:true,text:"MOIC by Exit EV",color:CC.txt}},
+    scales:{x:{ticks:{color:CC.txt,maxTicksLimit:8},grid:{color:CC.grid}},y:{ticks:{color:CC.txt,callback:v=>v.toFixed(1)+"x"},grid:{color:CC.grid}}}}});
 
-function updateDollarChart(){
-  destroyChart('dollar');
-  charts.dollar=new Chart(document.getElementById('dollarChart'),{type:'line',data:{labels:EVS.map(e=>$M(e)),datasets:[
-    {label:'BHC Total',data:BHC_TOTAL,borderColor:CC.bl,backgroundColor:CC.bl+'22',fill:true,tension:.3},
-    {label:'ACAP Total',data:ACAP_TOTAL,borderColor:CC.em,backgroundColor:CC.em+'22',fill:true,tension:.3},
-    {label:'BarronKent',data:BK_TOTAL,borderColor:CC.pu,backgroundColor:CC.pu+'22',fill:true,tension:.3},
-    {label:'Common Equity',data:COMMON_PAY,borderColor:CC.am,backgroundColor:CC.am+'11',fill:true,tension:.3}
+  // Dollar
+  dc("dollar");
+  charts.dollar=new Chart(document.getElementById("dollarChart"),{type:"line",data:{labels:lbls,datasets:[
+    {label:"BHC",data:all.map(r=>r.bhcTot),borderColor:CC.bl,backgroundColor:CC.bl+"22",fill:true,tension:.3},
+    {label:"ACAP",data:all.map(r=>r.acapTot),borderColor:CC.em,backgroundColor:CC.em+"22",fill:true,tension:.3},
+    {label:"BarronKent",data:all.map(r=>r.bkTot),borderColor:CC.pu,backgroundColor:CC.pu+"22",fill:true,tension:.3},
+    {label:"Common",data:all.map(r=>r.comPay),borderColor:CC.am,backgroundColor:CC.am+"11",fill:true,tension:.3}
   ]},options:{responsive:true,maintainAspectRatio:false,
-    plugins:{legend:{position:'top',labels:{color:CC.txt}},title:{display:true,text:'Dollar Returns by Exit EV',color:CC.txt}},
-    scales:{x:{ticks:{color:CC.txt,maxTicksLimit:8},grid:{color:CC.grid}},
-    y:{ticks:{color:CC.txt,callback:v=>$M(v)},grid:{color:CC.grid}}}}});
-}
+    plugins:{legend:{position:"top",labels:{color:CC.txt}},title:{display:true,text:"Dollar Returns",color:CC.txt}},
+    scales:{x:{ticks:{color:CC.txt,maxTicksLimit:8},grid:{color:CC.grid}},y:{ticks:{color:CC.txt,callback:v=>$M(v)},grid:{color:CC.grid}}}}});
 
-function updateWarrantChart(activeIdx){
-  destroyChart('warrant');
-  const wShares=EVS.map((_,i)=>WARRANT_PAY[i]>0?50529:0);
-  const bhcM=EVS.map((_,i)=>BHC_TOTAL[i]/BHC_BASIS);
-  charts.warrant=new Chart(document.getElementById('wChart'),{type:'bar',data:{labels:EVS.map(e=>$M(e)),datasets:[
-    {label:'Warrant Shares',data:wShares,backgroundColor:CC.am+'66',yAxisID:'y',borderRadius:3},
-    {label:'BHC MOIC',data:bhcM,type:'line',borderColor:CC.bl,yAxisID:'y1',tension:.3,pointRadius:EVS.map((_,i)=>i===activeIdx?5:1)}
+  // Warrant
+  dc("warrant");
+  charts.warrant=new Chart(document.getElementById("wChart"),{type:"bar",data:{labels:lbls,datasets:[
+    {label:"Warrant Shares",data:all.map(r=>r.wShares),backgroundColor:CC.am+"66",yAxisID:"y",borderRadius:3},
+    {label:"BHC MOIC",data:all.map(r=>r.bhcTot/BHC_BASIS),type:"line",borderColor:CC.bl,yAxisID:"y1",tension:.3,pointRadius:CONFIG.evs.map((_,i)=>i===ai?5:1)}
   ]},options:{responsive:true,maintainAspectRatio:false,
-    plugins:{legend:{position:'top',labels:{color:CC.txt}},
-      annotation:{}},
+    plugins:{legend:{position:"top",labels:{color:CC.txt}}},
     scales:{x:{ticks:{color:CC.txt,maxTicksLimit:8},grid:{color:CC.grid}},
-    y:{position:'left',ticks:{color:CC.am},grid:{color:CC.grid},title:{display:true,text:'Shares',color:CC.am}},
-    y1:{position:'right',ticks:{color:CC.bl,callback:v=>v.toFixed(1)+'x'},grid:{display:false},title:{display:true,text:'MOIC',color:CC.bl}}}}});
-}
+    y:{position:"left",ticks:{color:CC.am},grid:{color:CC.grid},title:{display:true,text:"Shares",color:CC.am}},
+    y1:{position:"right",ticks:{color:CC.bl,callback:v=>v.toFixed(1)+"x"},grid:{display:false},title:{display:true,text:"MOIC",color:CC.bl}}}}});
 
-function updateCEOChart(activeIdx){
-  destroyChart('ceo');
-  const activeEV=EVS[activeIdx];
-  charts.ceo=new Chart(document.getElementById('ceoChart'),{type:'bar',data:{labels:CEO_EVS.map(e=>$M(e)),datasets:[
-    {label:'CEO Bonus ($)',data:CEO_BONUS,backgroundColor:CC.em+'66',yAxisID:'y',borderRadius:3},
-    {label:'% of EV',data:CEO_PCT.map(p=>p*100),type:'line',borderColor:CC.am,yAxisID:'y1',tension:.3,pointRadius:CEO_EVS.map(e=>e===activeEV?5:1)}
+  // CEO
+  dc("ceo");
+  const ceoD=CONFIG.evs.map(ev=>computeCEO(ev));
+  charts.ceo=new Chart(document.getElementById("ceoChart"),{type:"bar",data:{labels:lbls,datasets:[
+    {label:"CEO Bonus",data:ceoD,backgroundColor:CC.em+"66",yAxisID:"y",borderRadius:3},
+    {label:"% of EV",data:CONFIG.evs.map((ev,i)=>ev>0?ceoD[i]/ev*100:0),type:"line",borderColor:CC.am,yAxisID:"y1",tension:.3,pointRadius:CONFIG.evs.map((_,i)=>i===ai?5:1)}
   ]},options:{responsive:true,maintainAspectRatio:false,
-    plugins:{legend:{position:'top',labels:{color:CC.txt}}},
+    plugins:{legend:{position:"top",labels:{color:CC.txt}}},
     scales:{x:{ticks:{color:CC.txt,maxTicksLimit:8},grid:{color:CC.grid}},
-    y:{position:'left',ticks:{color:CC.em,callback:v=>$M(v)},grid:{color:CC.grid},title:{display:true,text:'Bonus $',color:CC.em}},
-    y1:{position:'right',min:0,max:6,ticks:{color:CC.am,callback:v=>v.toFixed(1)+'%'},grid:{display:false},title:{display:true,text:'% of EV',color:CC.am}}}}});
+    y:{position:"left",ticks:{color:CC.em,callback:v=>$M(v)},grid:{color:CC.grid},title:{display:true,text:"Bonus",color:CC.em}},
+    y1:{position:"right",min:0,max:6,ticks:{color:CC.am,callback:v=>v.toFixed(1)+"%"},grid:{display:false},title:{display:true,text:"% EV",color:CC.am}}}}});
+
+  // Debt
+  dc("debt");
+  const yfd=w.yfDebt;
+  charts.debt=new Chart(document.getElementById("debtChart"),{type:"bar",data:{labels:["Apr 2023","Exit"],datasets:[
+    {label:"Principal",data:[10e6,10e6],backgroundColor:CC.bl+"88",stack:"a"},
+    {label:"Interest",data:[0,w.debtInt],backgroundColor:CC.am+"88",stack:"a"}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"top",labels:{color:CC.txt}}},
+    scales:{x:{ticks:{color:CC.txt},grid:{color:CC.grid}},y:{ticks:{color:CC.txt,callback:v=>$M(v)},grid:{color:CC.grid}}}}});
 }
 
 // Sorting
 let sC=-1,sA=true;
 function srt(col){
   if(sC===col)sA=!sA;else{sC=col;sA=true}
-  const body=document.getElementById('stbody');
+  const body=document.getElementById("stbody");
   const rows=Array.from(body.rows);
   rows.sort((a,b)=>{
-    let av=a.cells[col].textContent.replace(/[$,%,—]/g,'').trim();
-    let bv=b.cells[col].textContent.replace(/[$,%,—]/g,'').trim();
+    let av=a.cells[col].textContent.replace(/[$,%,\u2014]/g,"").trim();
+    let bv=b.cells[col].textContent.replace(/[$,%,\u2014]/g,"").trim();
     const an=parseFloat(av),bn=parseFloat(bv);
     if(!isNaN(an)&&!isNaN(bn))return sA?an-bn:bn-an;
     return sA?av.localeCompare(bv):bv.localeCompare(av);
@@ -654,551 +730,147 @@ function srt(col){
   rows.forEach(r=>body.appendChild(r));
 }
 
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 // INIT
-// ═══════════════════════════════════════════════
-document.addEventListener('DOMContentLoaded',()=>{
-  initStakeholders();initPies();initTrCards();initDebtChart();initCEOTable();
-  const slider=document.getElementById('evSlider');
+// ═══════════════════════════════════════════════════════════════
+document.addEventListener("DOMContentLoaded",()=>{
+  renderCapTable();initTrCards();initCEOTable();
+  const sl=document.getElementById("evSlider"),dp=document.getElementById("exitDatePicker");
   let t;
-  slider.addEventListener('input',()=>{clearTimeout(t);t=setTimeout(()=>update(parseInt(slider.value)),30)});
-  update(4); // default $90M
+  sl.addEventListener("input",()=>{clearTimeout(t);t=setTimeout(update,30)});
+  dp.addEventListener("change",()=>{clearTimeout(t);t=setTimeout(()=>{initCEOTable();update()},30)});
+  update();
 });
 
-// ═══════════════════════════════════════════════
-// PDF EXPORT
-// ═══════════════════════════════════════════════
-async function exportPDF(){
-  const btn=document.querySelector('[onclick="exportPDF()"]');
-  const origHTML=btn.innerHTML;
-  btn.innerHTML='<svg class="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-dasharray="30 60"/></svg> Generating...';
-  btn.disabled=true;
-  
-  try{
-    // Force light mode for PDF
-    const wasLight=document.body.classList.contains('light');
-    document.body.classList.add('light');
-    
-    // Hide nav/slider elements
-    const hideEls=document.querySelectorAll('nav,.slider-wrap');
-    hideEls.forEach(el=>el.style.display='none');
-    
-    // Add a temporary header with EV info for the PDF
-    const evVal=document.getElementById('evDisp').textContent;
-    const pdfHeader=document.createElement('div');
-    pdfHeader.id='pdf-header';
-    pdfHeader.style.cssText='padding:24px 0 16px;text-align:center;border-bottom:2px solid #E2E8F0;margin-bottom:16px';
-    pdfHeader.innerHTML=`<div style="font-size:24px;font-weight:800;color:#0F172A;letter-spacing:-0.5px">◆ Cardinality — Investment Waterfall Analysis</div>
-      <div style="font-size:14px;color:#64748B;margin-top:4px">Exit Enterprise Value: <strong style="color:#059669;font-family:JetBrains Mono">${evVal}</strong> · Generated ${new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})}</div>
-      <div style="font-size:10px;color:#F59E0B;margin-top:6px;text-transform:uppercase;letter-spacing:2px;font-weight:600">Privileged and Confidential — Preliminary Illustrative Analysis</div>`;
-    const content=document.querySelector('.max-w-7xl.mx-auto.px-4.py-8');
-    content.parentNode.insertBefore(pdfHeader,content);
-    
-    // Wait for Chart.js animations to settle
-    await new Promise(r=>setTimeout(r,500));
-    
-    const {jsPDF}=window.jspdf;
-    const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-    const pageW=pdf.internal.pageSize.getWidth();
-    const pageH=pdf.internal.pageSize.getHeight();
-    const margin=8;
-    const usableW=pageW-margin*2;
-    
-    // Capture each section as a separate canvas for better quality
-    const sections=content.querySelectorAll('section');
-    let yPos=margin;
-    
-    // First capture the header
-    const headerCanvas=await html2canvas(pdfHeader,{scale:2,useCORS:true,backgroundColor:'#FFFFFF',logging:false});
-    const headerRatio=headerCanvas.height/headerCanvas.width;
-    const headerH=usableW*headerRatio;
-    pdf.addImage(headerCanvas.toDataURL('image/png'),'PNG',margin,yPos,usableW,headerH);
-    yPos+=headerH+4;
-    
-    for(let i=0;i<sections.length;i++){
-      const sec=sections[i];
-      const canvas=await html2canvas(sec,{scale:2,useCORS:true,backgroundColor:'#FFFFFF',logging:false,
-        onclone:(doc)=>{
-          // Ensure charts render in cloned doc
-          doc.querySelectorAll('canvas').forEach(c=>{c.style.maxHeight='none'});
-        }
-      });
-      const ratio=canvas.height/canvas.width;
-      const imgH=usableW*ratio;
-      
-      // Check if section fits on current page
-      if(yPos+imgH>pageH-margin && yPos>margin+10){
-        pdf.addPage();
-        yPos=margin;
-      }
-      
-      // If section is taller than one page, scale it down
-      if(imgH>pageH-margin*2){
-        const scale=(pageH-margin*2)/imgH;
-        const scaledW=usableW*scale;
-        const scaledH=imgH*scale;
-        const xOffset=margin+(usableW-scaledW)/2;
-        pdf.addImage(canvas.toDataURL('image/png'),'PNG',xOffset,yPos,scaledW,scaledH);
-        yPos+=scaledH+4;
-      }else{
-        pdf.addImage(canvas.toDataURL('image/png'),'PNG',margin,yPos,usableW,imgH);
-        yPos+=imgH+4;
-      }
-    }
-    
-    // Add page numbers
-    const totalPages=pdf.internal.getNumberOfPages();
-    for(let p=1;p<=totalPages;p++){
-      pdf.setPage(p);
-      pdf.setFontSize(8);pdf.setTextColor(150);
-      pdf.text(`Page ${p} of ${totalPages}`,pageW/2,pageH-4,{align:'center'});
-    }
-    
-    // Save
-    const evLabel=evVal.replace(/[$,]/g,'').trim();
-    pdf.save(`Cardinality_Waterfall_EV_${evLabel}_${new Date().toISOString().slice(0,10)}.pdf`);
-    
-    // Cleanup
-    pdfHeader.remove();
-    hideEls.forEach(el=>el.style.display='');
-    if(!wasLight)document.body.classList.remove('light');
-    
-  }catch(e){
-    console.error('PDF export error:',e);
-    alert('PDF generation failed. Try using Ctrl+P (Print to PDF) as fallback.');
-  }finally{
-    btn.innerHTML=origHTML;
-    btn.disabled=false;
-  }
-}
-
-// ═══════════════════════════════════════════════
-// EXPORT MENU
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════════════════════════
 function toggleExportMenu(){
-  const dd=document.getElementById('exportDropdown');
-  dd.classList.toggle('hidden');
-  // Close on outside click
-  if(!dd.classList.contains('hidden')){
-    setTimeout(()=>{
-      const closer=e=>{if(!document.getElementById('exportMenu').contains(e.target)){dd.classList.add('hidden');document.removeEventListener('click',closer)}};
-      document.addEventListener('click',closer);
-    },10);
-  }
+  const dd=document.getElementById("exportDropdown");dd.classList.toggle("hidden");
+  if(!dd.classList.contains("hidden")){setTimeout(()=>{
+    const cl=e=>{if(!document.getElementById("exportMenu").contains(e.target)){dd.classList.add("hidden");document.removeEventListener("click",cl)}};
+    document.addEventListener("click",cl)},10)}
+}
+async function exportPDF(){
+  const btn=document.querySelector('[onclick="exportPDF()"]');const orig=btn.innerHTML;
+  btn.innerHTML="Generating...";btn.disabled=true;
+  try{
+    const wasL=document.body.classList.contains("light");document.body.classList.add("light");
+    const hide=document.querySelectorAll("nav,.slider-wrap");hide.forEach(el=>el.style.display="none");
+    const evV=document.getElementById("evDisp").textContent;
+    const hdr=document.createElement("div");hdr.id="pdf-header";
+    hdr.style.cssText="padding:24px 0 16px;text-align:center;border-bottom:2px solid #E2E8F0;margin-bottom:16px";
+    hdr.innerHTML=`<div style="font-size:24px;font-weight:800;color:#0F172A">\u25c6 Cardinality \u2014 Waterfall Analysis</div>
+      <div style="font-size:14px;color:#64748B;margin-top:4px">EV: <b style="color:#059669">${evV}</b> \u00b7 Exit: ${document.getElementById("exitDatePicker").value}</div>
+      <div style="font-size:10px;color:#F59E0B;margin-top:6px;text-transform:uppercase;letter-spacing:2px">Confidential</div>`;
+    const ct=document.querySelector(".max-w-7xl.mx-auto.px-4.py-8");ct.parentNode.insertBefore(hdr,ct);
+    await new Promise(r=>setTimeout(r,500));
+    const{jsPDF}=window.jspdf;const pdf=new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});
+    const W=pdf.internal.pageSize.getWidth(),H=pdf.internal.pageSize.getHeight(),mg=8,uw=W-mg*2;
+    const secs=ct.querySelectorAll("section");let yP=mg;
+    const hC=await html2canvas(hdr,{scale:2,useCORS:true,backgroundColor:"#FFFFFF",logging:false});
+    const hR=hC.height/hC.width,hH=uw*hR;
+    pdf.addImage(hC.toDataURL("image/png"),"PNG",mg,yP,uw,hH);yP+=hH+4;
+    for(let i=0;i<secs.length;i++){
+      const cv=await html2canvas(secs[i],{scale:2,useCORS:true,backgroundColor:"#FFFFFF",logging:false});
+      const r=cv.height/cv.width,ih=uw*r;
+      if(yP+ih>H-mg&&yP>mg+10){pdf.addPage();yP=mg}
+      if(ih>H-mg*2){const sc=(H-mg*2)/ih;pdf.addImage(cv.toDataURL("image/png"),"PNG",mg+(uw-uw*sc)/2,yP,uw*sc,ih*sc);yP+=ih*sc+4}
+      else{pdf.addImage(cv.toDataURL("image/png"),"PNG",mg,yP,uw,ih);yP+=ih+4}
+    }
+    const tp=pdf.internal.getNumberOfPages();
+    for(let p=1;p<=tp;p++){pdf.setPage(p);pdf.setFontSize(8);pdf.setTextColor(150);pdf.text(`Page ${p}/${tp}`,W/2,H-4,{align:"center"})}
+    pdf.save(`Cardinality_Waterfall_${new Date().toISOString().slice(0,10)}.pdf`);
+    hdr.remove();hide.forEach(el=>el.style.display="");if(!wasL)document.body.classList.remove("light");
+  }catch(e){console.error(e);alert("PDF failed")}finally{btn.innerHTML=orig;btn.disabled=false}
 }
 
-// ═══════════════════════════════════════════════
-// INVESTOR-LEVEL PDF EXPORT
-// ═══════════════════════════════════════════════
-
-const INVESTOR_PROFILES = {
-  BHC: {
-    name: 'Boathouse Capital III LP',
-    short: 'BHC',
-    color: '#3B82F6',
-    accent: '#1E40AF',
-    basis: 10000000,
-    basisLabel: '$10,000,000 (Senior Debt)',
-    equityInv: 3494653,
-    description: 'Senior secured lender and Class A preferred equity investor',
-    holdings: [
-      {type:'Senior Debt',detail:'$10M principal at 14% interest (Apr 2023)',shares:'—'},
-      {type:'Class A Series A-1 Preferred',detail:'130,984 shares at $26.68 OIP',shares:'130,984'},
-      {type:'MOIC Ratchet Warrant',detail:'Up to 50,529 shares (12.5% FD cap)',shares:'≤50,529'}
-    ],
-    keyTerms: [
-      'Senior secured position — first dollar out after fees/CEO',
-      'Class A preferred — priority over all Class B tranches',
-      '2.0x liquidation preference with 8% PIK ($8,048,426 total at exit)',
-      'MOIC ratchet warrant: if total return < 3.0x, additional shares issued (capped at 12.5% FD)',
-      'Debt interest ($6.65M accrued) is a separate company obligation — NOT paid from waterfall',
-      'A-1 converts to common when as-converted value exceeds liq pref (threshold: ~$71.9M EV)'
-    ],
-    getReturns: function(idx){
-      const equity=BHC_EQUITY[idx];
-      const debt=BHC_DEBT[idx];
-      const total=BHC_TOTAL[idx];
-      const moic=total/this.basis;
-      const a1pay=A1_PAYOUT[idx];
-      const wpay=WARRANT_PAY[idx];
-      const converts=EVS[idx]>=TR.A1.thEV;
-      return {
-        totalProceeds:total, moic, gain:total-this.basis,
-        components:[
-          {label:'Senior Debt Repayment',value:debt},
-          {label:'A-1 Preferred ('+(converts?'Converts to Common':'Liq Pref')+')',value:a1pay},
-          {label:'MOIC Warrant Proceeds',value:wpay}
-        ],
-        a1Converts:converts,
-        warrantActive:wpay>0,
-        warrantShares:wpay>0?50529:0
-      };
-    }
-  },
-  ACAP: {
-    name: 'Attain Capital Partners (ACAP)',
-    short: 'ACAP',
-    color: '#10B981',
-    accent: '#047857',
-    basis: 11935000,
-    basisLabel: '$11,935,000 (All Class B Preferred)',
-    description: 'Lead preferred equity investor across all 6 Class B tranches',
-    holdings: [
-      {type:'Series B-1',detail:'200,000 shares at $15.00 OIP ($3.0M invested)',shares:'200,000'},
-      {type:'Series B-2',detail:'50,000 shares at $20.00 OIP ($1.0M invested)',shares:'50,000'},
-      {type:'Series B-3',detail:'26,250 shares at $40.00 OIP ($1.05M invested)',shares:'26,250'},
-      {type:'Series B-4',detail:'74,730 shares at $40.81 OIP ($3.05M invested)',shares:'74,730'},
-      {type:'Series B-5',detail:'18,125 shares at $68.14 OIP ($1.235M invested)',shares:'18,125'},
-      {type:'Series B-6',detail:'69,262 shares at $37.54 OIP ($2.6M invested)',shares:'69,262'}
-    ],
-    keyTerms: [
-      'Class B preferred — pari passu across all 6 tranches, junior to Class A',
-      '2.0x liquidation preference with 8% PIK on each tranche',
-      'Each tranche independently tests conversion: liq pref vs as-converted value',
-      'Earlier tranches (B-1, B-2) convert at lower EVs; B-5 requires ~$146M EV to convert',
-      'Total Class B liquidation preference: $27,487,124 (incl. PIK)',
-      'Common stock holdings (300,506 shares via Attain entities) earn residual on top of preferred'
-    ],
-    getReturns: function(idx){
-      const total=ACAP_TOTAL[idx];
-      const moic=total/this.basis;
-      const trPayouts=[
-        {label:'B-1: '+(EVS[idx]>=TR.B1.thEV?'Converts':'Liq Pref'),value:B1_PAY[idx]},
-        {label:'B-2: '+(EVS[idx]>=TR.B2.thEV?'Converts':'Liq Pref'),value:B2_PAY[idx]},
-        {label:'B-3: '+(EVS[idx]>=TR.B3.thEV?'Converts':'Liq Pref'),value:B3_PAY[idx]},
-        {label:'B-4: '+(EVS[idx]>=TR.B4.thEV?'Converts':'Liq Pref'),value:B4_PAY[idx]},
-        {label:'B-5: '+(EVS[idx]>=TR.B5.thEV?'Converts':'Liq Pref'),value:B5_PAY[idx]},
-        {label:'B-6: '+(EVS[idx]>=TR.B6.thEV?'Converts':'Liq Pref'),value:B6_PAY[idx]}
-      ];
-      return {totalProceeds:total,moic,gain:total-this.basis,components:trPayouts};
-    }
-  },
-  BK: {
-    name: 'BarronKent Ventures, LLC',
-    short: 'BarronKent',
-    color: '#8B5CF6',
-    accent: '#6D28D9',
-    basis: 2050000,
-    basisLabel: '$2,050,000 (Series B-4 allocation)',
-    description: 'Preferred equity investor in Series B-4 tranche',
-    holdings: [
-      {type:'Series B-4 (pro-rata allocation)',detail:'59,866 shares out of 74,730 total B-4 (80.1%)',shares:'59,866'}
-    ],
-    keyTerms: [
-      'Invested in Series B-4 at $40.81 OIP',
-      'Holds 80.1% of B-4 tranche (59,866 of 74,730 shares)',
-      'B-4 liquidation preference: $7,024,359 total (BarronKent pro-rata: $5,627,195)',
-      'B-4 converts when EV ≥ ~$97.9M; below that, receives liq pref',
-      'Class B pari passu — ranks equally with other B tranches but junior to Class A (BHC)',
-      'At low EVs, liq pref provides downside protection (2.0x + PIK on $2.05M = $4.72M floor)'
-    ],
-    getReturns: function(idx){
-      const total=BK_TOTAL[idx];
-      const moic=total/this.basis;
-      const b4conv=EVS[idx]>=TR.B4.thEV;
-      return {
-        totalProceeds:total,moic,gain:total-this.basis,
-        components:[
-          {label:'B-4 Pro-Rata ('+(b4conv?'Converts to Common':'Liq Pref')+')',value:total}
-        ],
-        b4Converts:b4conv
-      };
-    }
-  }
+const INVESTOR_PROFILES={
+  BHC:{name:"Boathouse Capital III LP",short:"BHC",color:"#3B82F6",accent:"#1E40AF",basis:BHC_BASIS,
+    desc:"Senior lender + Class A preferred",
+    holdings:[{type:"Senior Debt",detail:"$10M at 14%",shares:"\u2014"},{type:"A-1 Preferred",detail:"130,984 shares at $26.68",shares:"130,984"},{type:"MOIC Warrant",detail:"Up to 50,529 (12.5% cap)",shares:"\u226450,529"}],
+    keyTerms:["Senior secured \u2014 first out after fees/CEO","A-1: 2.0x liq pref + 8% PIK","MOIC ratchet if < 3.0x (capped 12.5% FD)"],
+    getRet:function(w){return{tot:w.bhcTot,moic:w.bhcTot/this.basis,gain:w.bhcTot-this.basis,
+      comp:[{l:"Debt",v:w.debt},{l:"A-1 "+(w.conv.A1?"Conv":"Liq"),v:w.trPay.A1},{l:"Warrant",v:w.wPay}]}}},
+  ACAP:{name:"Attain Capital Partners",short:"ACAP",color:"#10B981",accent:"#047857",basis:ACAP_BASIS,
+    desc:"Lead B-series preferred investor",
+    holdings:[{type:"B-1",detail:"200,000 @ $15",shares:"200,000"},{type:"B-2",detail:"50,000 @ $20",shares:"50,000"},
+      {type:"B-3",detail:"25,000 @ $40",shares:"25,000"},{type:"B-4",detail:"7,381 @ $40.79",shares:"7,381"},
+      {type:"B-5",detail:"18,125 @ $68.21",shares:"18,125"},{type:"B-6",detail:"8,658 @ $37.53",shares:"8,658"}],
+    keyTerms:["0 common, 300,506 Pref B post-exchange","B-1 200K, B-2 50K, B-3 25K, B-4 7,381, B-5 18,125","B-6 8,658 added on 2024 note conversion"],
+    getRet:function(w){
+      const tr={B1:200000,B2:50000,B3:25000,B4:7381,B5:18125,B6:8658};
+      const comp=Object.entries(tr).map(([k,sh])=>({l:k+" "+(w.conv[k]?"Conv":"Liq")+" ("+N(sh)+"/"+N(CONFIG.tranches[k].shares)+")",v:w.trPay[k]*(sh/CONFIG.tranches[k].shares)}));
+      return{tot:w.acapTot,moic:w.acapTot/this.basis,gain:w.acapTot-this.basis,comp}}},
+  BK:{name:"BarronKent Ventures",short:"BK",color:"#8B5CF6",accent:"#6D28D9",basis:BK_BASIS,
+    desc:"B-4 and B-6 investor",
+    holdings:[{type:"B-4",detail:"59,866 @ $40.79",shares:"59,866"},{type:"B-6",detail:"1,732 @ $37.53",shares:"1,732"}],
+    keyTerms:["80.1% of B-4 tranche","B-6 added on 2024 note conversion"],
+    getRet:function(w){
+      const tr={B4:59866,B6:1732};
+      const comp=Object.entries(tr).map(([k,sh])=>({l:k+" "+(w.conv[k]?"Conv":"Liq"),v:w.trPay[k]*(sh/CONFIG.tranches[k].shares)}));
+      return{tot:w.bkTot,moic:w.bkTot/this.basis,gain:w.bkTot-this.basis,comp}}}
 };
 
-async function exportInvestorPDF(investorKey){
-  const inv=INVESTOR_PROFILES[investorKey];
-  if(!inv)return;
-  
-  const sliderIdx=parseInt(document.getElementById('evSlider').value);
-  const ev=EVS[sliderIdx];
-  const ret=inv.getReturns(sliderIdx);
-  
-  const {jsPDF}=window.jspdf;
-  const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-  const W=pdf.internal.pageSize.getWidth();
-  const H=pdf.internal.pageSize.getHeight();
-  const m=15; // margin
-  const cw=W-m*2; // content width
+async function exportInvestorPDF(key){
+  const inv=INVESTOR_PROFILES[key];if(!inv)return;
+  const ev=getEV(),exitDate=getExitDate(),w=computeWaterfall(ev,exitDate),ret=inv.getRet(w);
+  const{jsPDF}=window.jspdf;const pdf=new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});
+  const W=pdf.internal.pageSize.getWidth(),H=pdf.internal.pageSize.getHeight(),m=15,cw=W-m*2;
   let y=m;
-  
-  // Helper functions
-  const setFont=(size,style='normal',color='#1E293B')=>{pdf.setFontSize(size);pdf.setFont('helvetica',style);pdf.setTextColor(color)};
-  const drawLine=(y1,color='#E2E8F0',width=0.3)=>{pdf.setDrawColor(color);pdf.setLineWidth(width);pdf.line(m,y1,W-m,y1)};
-  const checkPage=(needed)=>{if(y+needed>H-20){pdf.addPage();y=m;return true}return false};
-  const fmtC=(v)=>v<0?`(${new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(-v)})`:new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(v);
-  const fmtM=(v)=>'$'+(v/1e6).toFixed(1)+'M';
-  
-  // ═══════ PAGE 1: COVER / SUMMARY ═══════
-  
-  // Header bar
-  pdf.setFillColor(inv.accent);
-  pdf.rect(0,0,W,32,F='F');
-  setFont(20,'bold','#FFFFFF');
-  pdf.text('◆ CARDINALITY',m,14);
-  setFont(10,'normal','#FFFFFF');
-  pdf.text('Confidential Investor Summary',m,21);
-  setFont(9,'normal',inv.color);
-  pdf.text('PRIVILEGED AND CONFIDENTIAL — PRELIMINARY ILLUSTRATIVE ANALYSIS',m,28);
-  y=40;
-  
-  // Investor name block
-  setFont(22,'bold',inv.accent);
-  pdf.text(inv.name,m,y);y+=8;
-  setFont(11,'normal','#64748B');
-  pdf.text(inv.description,m,y);y+=5;
-  drawLine(y,inv.color,0.8);y+=8;
-  
-  // Scenario callout
-  pdf.setFillColor('#F0FDF4');
-  pdf.roundedRect(m,y,cw,22,3,3,'F');
-  pdf.setDrawColor(inv.color);pdf.setLineWidth(0.5);
-  pdf.roundedRect(m,y,cw,22,3,3,'S');
-  setFont(10,'normal','#047857');
-  pdf.text('Exit Scenario',m+5,y+7);
-  setFont(16,'bold',inv.accent);
-  pdf.text('Enterprise Value: '+fmtC(ev),m+5,y+16);
-  setFont(10,'normal','#64748B');
-  pdf.text('Generated: '+new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}),m+cw-60,y+16);
-  y+=30;
-  
-  // ═══ KEY METRICS (4 boxes) ═══
-  const boxW=(cw-9)/4;
-  const metrics=[
-    {label:'TOTAL PROCEEDS',value:fmtC(ret.totalProceeds),color:inv.accent},
-    {label:'MOIC',value:ret.moic.toFixed(2)+'x',color:ret.moic>=3?'#059669':ret.moic>=2?'#D97706':'#DC2626'},
-    {label:'TOTAL GAIN/(LOSS)',value:fmtC(ret.gain),color:ret.gain>=0?'#059669':'#DC2626'},
-    {label:'COST BASIS',value:fmtC(inv.basis),color:'#475569'}
-  ];
-  metrics.forEach((met,i)=>{
-    const bx=m+i*(boxW+3);
-    pdf.setFillColor('#F8FAFC');
-    pdf.roundedRect(bx,y,boxW,20,2,2,'F');
-    pdf.setDrawColor('#E2E8F0');pdf.setLineWidth(0.2);
-    pdf.roundedRect(bx,y,boxW,20,2,2,'S');
-    setFont(7,'bold','#94A3B8');
-    pdf.text(met.label,bx+3,y+6);
-    setFont(13,'bold',met.color);
-    pdf.text(met.value,bx+3,y+15);
-  });
-  y+=28;
-  
-  // ═══ PROCEEDS BREAKDOWN ═══
-  setFont(13,'bold','#1E293B');
-  pdf.text('Proceeds Breakdown',m,y);y+=6;
-  drawLine(y,inv.color,0.5);y+=4;
-  
-  // Table header
-  pdf.setFillColor('#F1F5F9');
-  pdf.rect(m,y,cw,7,'F');
-  setFont(8,'bold','#475569');
-  pdf.text('Component',m+3,y+5);
-  pdf.text('Amount',m+cw-35,y+5,{align:'right'});
-  y+=9;
-  
-  ret.components.forEach((c,i)=>{
-    if(i%2===0){pdf.setFillColor('#FAFAFA');pdf.rect(m,y-2,cw,7,'F')}
-    setFont(9,'normal','#334155');
-    pdf.text(c.label,m+3,y+3);
-    setFont(9,'bold',c.value>=0?'#059669':'#DC2626');
-    pdf.text(fmtC(c.value),m+cw-35,y+3,{align:'right'});
-    y+=7;
-  });
-  
-  // Total line
-  drawLine(y-1,'#334155',0.5);y+=2;
-  pdf.setFillColor(inv.accent);pdf.rect(m,y-1,cw,8,'F');
-  setFont(10,'bold','#FFFFFF');
-  pdf.text('TOTAL PROCEEDS',m+3,y+5);
-  pdf.text(fmtC(ret.totalProceeds),m+cw-35,y+5,{align:'right'});
-  y+=14;
-  
-  // ═══ HOLDINGS ═══
-  checkPage(50);
-  setFont(13,'bold','#1E293B');
-  pdf.text('Holdings Summary',m,y);y+=6;
-  drawLine(y,inv.color,0.5);y+=4;
-  
-  pdf.setFillColor('#F1F5F9');pdf.rect(m,y,cw,7,'F');
-  setFont(8,'bold','#475569');
-  pdf.text('Security Type',m+3,y+5);
-  pdf.text('Detail',m+55,y+5);
-  pdf.text('Shares',m+cw-20,y+5,{align:'right'});
-  y+=9;
-  
-  inv.holdings.forEach((h,i)=>{
-    if(i%2===0){pdf.setFillColor('#FAFAFA');pdf.rect(m,y-2,cw,7,'F')}
-    setFont(9,'bold','#334155');
-    pdf.text(h.type,m+3,y+3);
-    setFont(8,'normal','#64748B');
-    const detailLines=pdf.splitTextToSize(h.detail,90);
-    pdf.text(detailLines,m+55,y+3);
-    setFont(9,'normal','#334155');
-    pdf.text(h.shares,m+cw-20,y+3,{align:'right'});
-    y+=7*Math.max(detailLines.length,1);
-  });
-  y+=8;
-  
-  // ═══ KEY TERMS & PROTECTIONS ═══
-  checkPage(60);
-  setFont(13,'bold','#1E293B');
-  pdf.text('Key Terms & Protections',m,y);y+=6;
-  drawLine(y,inv.color,0.5);y+=5;
-  
-  inv.keyTerms.forEach(term=>{
-    checkPage(10);
-    setFont(8,'normal',inv.accent);
-    pdf.text('●',m+2,y);
-    setFont(9,'normal','#334155');
-    const lines=pdf.splitTextToSize(term,cw-10);
-    pdf.text(lines,m+8,y);
-    y+=5*lines.length+1;
-  });
-  y+=6;
-  
-  // ═══ PAGE 2: SENSITIVITY / SCENARIO ANALYSIS ═══
-  pdf.addPage();y=m;
-  
-  // Header
-  pdf.setFillColor(inv.accent);pdf.rect(0,0,W,12,'F');
-  setFont(9,'bold','#FFFFFF');
-  pdf.text('◆ CARDINALITY  |  '+inv.name+'  |  Scenario Analysis',m,8);
-  y=20;
-  
-  // MOIC Sensitivity Table
-  setFont(13,'bold','#1E293B');
-  pdf.text('Return Sensitivity by Exit Enterprise Value',m,y);y+=6;
-  drawLine(y,inv.color,0.5);y+=5;
-  
-  // Table
-  pdf.setFillColor(inv.accent);pdf.rect(m,y,cw,7,'F');
-  setFont(8,'bold','#FFFFFF');
-  const cols=['Exit EV','Proceeds','MOIC','Gain/(Loss)','Status'];
-  const colX=[m+3,m+35,m+75,m+105,m+140];
-  cols.forEach((c,i)=>pdf.text(c,colX[i],y+5));
-  y+=9;
-  
-  // Show every other EV for space (18 rows)
-  const showIdxs=[0,1,2,3,4,5,6,7,8,10,12,14,16,18,20,24,28,34];
-  showIdxs.forEach((si,ri)=>{
-    if(si>=EVS.length)return;
-    checkPage(7);
-    const r=inv.getReturns(si);
-    const isActive=si===sliderIdx;
-    if(isActive){pdf.setFillColor('#DBEAFE');pdf.rect(m,y-2,cw,7,'F')}
-    else if(ri%2===0){pdf.setFillColor('#FAFAFA');pdf.rect(m,y-2,cw,7,'F')}
-    
-    setFont(8,isActive?'bold':'normal','#334155');
-    pdf.text(fmtM(EVS[si]),colX[0],y+3);
-    setFont(8,isActive?'bold':'normal',r.gain>=0?'#059669':'#DC2626');
-    pdf.text(fmtC(r.totalProceeds),colX[1],y+3);
-    const moicColor=r.moic>=3?'#059669':r.moic>=2?'#D97706':'#DC2626';
-    setFont(8,'bold',moicColor);
-    pdf.text(r.moic.toFixed(2)+'x',colX[2],y+3);
-    setFont(8,'normal',r.gain>=0?'#059669':'#DC2626');
-    pdf.text(fmtC(r.gain),colX[3],y+3);
-    
-    // Status indicator
-    let status='';
-    if(investorKey==='BHC'){status=r.moic>=3?'✓ Target Met':'⚠ Below 3.0x'}
-    else if(investorKey==='ACAP'){
-      const converting=(['B1','B2','B3','B4','B5','B6']).filter(k=>EVS[si]>=TR[k].thEV).length;
-      status=converting+'/6 convert';
-    }else{status=EVS[si]>=TR.B4.thEV?'Converts':'Liq Pref'}
-    setFont(7,'normal','#64748B');
-    pdf.text(status,colX[4],y+3);
-    y+=7;
-  });
-  y+=6;
-  
-  // ═══ WATERFALL POSITION VISUAL ═══
-  checkPage(55);
-  setFont(13,'bold','#1E293B');
-  pdf.text('Waterfall Position',m,y);y+=6;
-  drawLine(y,inv.color,0.5);y+=5;
-  
-  const wfSteps=[
-    {n:'1',l:'Transaction Fees (3% of EV)',v:fmtC(FEES[sliderIdx]+1500000),you:false},
-    {n:'2',l:'CEO SVPT Phantom Equity',v:fmtC(CEO_BONUS[sliderIdx]||0),you:false},
-    {n:'3',l:'BHC Senior Debt — $10M Principal',v:fmtC(10000000),you:investorKey==='BHC'},
-    {n:'4',l:'Class A Preferred (BHC)',v:A1_LIQ_PAID[sliderIdx]>0?fmtC(A1_LIQ_PAID[sliderIdx])+' liq pref':'Converts →',you:investorKey==='BHC'},
-    {n:'5',l:'Class B Preferred (Pari Passu)',v:B_LIQ_PAID[sliderIdx]>0?fmtC(B_LIQ_PAID[sliderIdx])+' liq pref':'Converts →',you:investorKey!=='BHC'},
-    {n:'6',l:'Residual to Common + Converted Preferred',v:fmtC(RESIDUAL_POOL[sliderIdx])+' ('+N(RESIDUAL_SHARES[sliderIdx])+' shares @ $'+RES_PER_SHARE[sliderIdx].toFixed(2)+')',you:true}
-  ];
-  
-  wfSteps.forEach(st=>{
-    const boxColor=st.you?inv.color:'#E2E8F0';
-    const fillColor=st.you?inv.color+'15':'#FAFAFA';
-    pdf.setFillColor(fillColor);
-    pdf.roundedRect(m,y,cw,10,1,1,'F');
-    pdf.setDrawColor(boxColor);pdf.setLineWidth(st.you?0.5:0.2);
-    pdf.roundedRect(m,y,cw,10,1,1,'S');
-    
-    // Step number circle
-    pdf.setFillColor(st.you?inv.accent:'#94A3B8');
-    pdf.circle(m+7,y+5,3,'F');
-    setFont(7,'bold','#FFFFFF');
-    pdf.text(st.n,m+7,y+6.5,{align:'center'});
-    
-    setFont(9,st.you?'bold':'normal',st.you?inv.accent:'#475569');
-    pdf.text(st.l+(st.you?' ◄ YOU':''),m+14,y+4.5);
-    setFont(8,'normal','#64748B');
-    const valLines=pdf.splitTextToSize(st.v,cw-20);
-    pdf.text(valLines[0],m+14,y+8.5);
-    y+=12;
-  });
-  y+=6;
-  
-  // ═══ KEY ASSUMPTIONS ═══
-  checkPage(40);
-  setFont(13,'bold','#1E293B');
-  pdf.text('Key Model Assumptions',m,y);y+=6;
-  drawLine(y,inv.color,0.5);y+=4;
-  
-  const assumptions=[
-    ['Exit Date','December 31, 2027'],
-    ['Transaction Fee','3.00% of EV'],
-    ['Liquidation Preference','2.0x Original Issue Price'],
-    ['PIK Rate','8.00% annual (accrues from 3/1/2026 exchange)'],
-    ['BHC Debt Rate','14.00% on $10M principal'],
-    ['MOIC Ratchet Target','3.0x on $10M debt basis'],
-    ['Warrant Cap','12.5% of fully diluted shares (50,529 max)'],
-    ['CEO Floor','$750,000 minimum (if EV ≥ $50M)'],
-    ['CEO Cap','5.00% of Enterprise Value'],
-    ['Fully Diluted Shares','1,452,102 (post-warrant)'],
-    ['Common Shares','777,334'],
-    ['Total Preferred','569,351 (7 tranches)']
-  ];
-  
-  assumptions.forEach((a,i)=>{
-    if(i%2===0){pdf.setFillColor('#FAFAFA');pdf.rect(m,y-1.5,cw,6,'F')}
-    setFont(8,'bold','#475569');
-    pdf.text(a[0],m+3,y+2);
-    setFont(8,'normal','#334155');
-    pdf.text(a[1],m+65,y+2);
-    y+=6;
-  });
-  
-  // Footer on all pages
-  const totalPages=pdf.internal.getNumberOfPages();
-  for(let p=1;p<=totalPages;p++){
-    pdf.setPage(p);
-    setFont(7,'normal','#94A3B8');
-    pdf.text('Cardinality Waterfall Model v1.5.8 — '+inv.name+' — Confidential',W/2,H-6,{align:'center'});
-    pdf.text('Page '+p+' of '+totalPages,W-m,H-6,{align:'right'});
-  }
-  
-  pdf.save(`Cardinality_${inv.short}_Summary_EV_${fmtM(ev).replace('$','')}_${new Date().toISOString().slice(0,10)}.pdf`);
-}
+  const sf=(sz,st,cl)=>{pdf.setFontSize(sz);pdf.setFont("helvetica",st||"normal");pdf.setTextColor(cl||"#1E293B")};
+  const dl=(y1,cl)=>{pdf.setDrawColor(cl||"#E2E8F0");pdf.setLineWidth(0.3);pdf.line(m,y1,W-m,y1)};
+  const cp=(n)=>{if(y+n>H-20){pdf.addPage();y=m}};
 
-async function exportAllInvestorPDFs(){
-  const keys=['BHC','ACAP','BK'];
-  for(const k of keys){
-    await exportInvestorPDF(k);
-    await new Promise(r=>setTimeout(r,300)); // Small delay between downloads
-  }
+  pdf.setFillColor(inv.accent);pdf.rect(0,0,W,28,"F");
+  sf(18,"bold","#FFFFFF");pdf.text("\u25c6 CARDINALITY \u2014 "+inv.name,m,12);
+  sf(9,"normal","#FFFFFF");pdf.text(inv.desc+" \u00b7 Exit: "+$M(ev)+" \u00b7 "+document.getElementById("exitDatePicker").value,m,22);
+  y=36;
+
+  // Metrics
+  const bw=(cw-9)/4;
+  [{l:"PROCEEDS",v:$(ret.tot),cl:inv.accent},{l:"MOIC",v:X(ret.moic),cl:ret.moic>=3?"#059669":"#DC2626"},
+   {l:"GAIN/(LOSS)",v:$(ret.gain),cl:ret.gain>=0?"#059669":"#DC2626"},{l:"BASIS",v:$(inv.basis),cl:"#475569"}
+  ].forEach((mt,i)=>{
+    const bx=m+i*(bw+3);pdf.setFillColor("#F8FAFC");pdf.roundedRect(bx,y,bw,18,2,2,"F");
+    sf(7,"bold","#94A3B8");pdf.text(mt.l,bx+3,y+6);sf(12,"bold",mt.cl);pdf.text(mt.v,bx+3,y+14);
+  });y+=26;
+
+  // Proceeds
+  sf(12,"bold");pdf.text("Proceeds Breakdown",m,y);y+=5;dl(y,inv.color);y+=4;
+  ret.comp.forEach((c,i)=>{
+    if(i%2===0){pdf.setFillColor("#FAFAFA");pdf.rect(m,y-2,cw,7,"F")}
+    sf(9,"normal","#334155");pdf.text(c.l,m+3,y+3);
+    sf(9,"bold",c.v>=0?"#059669":"#DC2626");pdf.text($(c.v),m+cw-35,y+3,{align:"right"});y+=7;
+  });
+  dl(y-1,"#334155");y+=2;
+  pdf.setFillColor(inv.accent);pdf.rect(m,y-1,cw,8,"F");
+  sf(10,"bold","#FFFFFF");pdf.text("TOTAL",m+3,y+5);pdf.text($(ret.tot),m+cw-35,y+5,{align:"right"});y+=14;
+
+  // Sensitivity
+  cp(60);sf(12,"bold");pdf.text("Sensitivity",m,y);y+=5;dl(y,inv.color);y+=4;
+  pdf.setFillColor(inv.accent);pdf.rect(m,y,cw,7,"F");
+  sf(8,"bold","#FFFFFF");["EV","Proceeds","MOIC","Gain"].forEach((c,i)=>pdf.text(c,[m+3,m+35,m+75,m+105][i],y+5));y+=9;
+  [0,2,4,6,8,10,12,14,16,18,20,25,30,35].forEach((si,ri)=>{
+    if(si>=CONFIG.evs.length)return;cp(7);
+    const sw=computeWaterfall(CONFIG.evs[si],exitDate),sr=inv.getRet(sw);
+    const act=CONFIG.evs[si]===ev;
+    if(act){pdf.setFillColor("#DBEAFE");pdf.rect(m,y-2,cw,7,"F")}
+    else if(ri%2===0){pdf.setFillColor("#FAFAFA");pdf.rect(m,y-2,cw,7,"F")}
+    sf(8,act?"bold":"normal","#334155");pdf.text($M(CONFIG.evs[si]),m+3,y+3);
+    sf(8,"normal",sr.gain>=0?"#059669":"#DC2626");pdf.text($(sr.tot),m+35,y+3);
+    sf(8,"bold",sr.moic>=3?"#059669":"#DC2626");pdf.text(X(sr.moic),m+75,y+3);
+    sf(8,"normal",sr.gain>=0?"#059669":"#DC2626");pdf.text($(sr.gain),m+105,y+3);
+    y+=7;
+  });
+
+  const tp=pdf.internal.getNumberOfPages();
+  for(let p=1;p<=tp;p++){pdf.setPage(p);sf(7,"normal","#94A3B8");
+    pdf.text("Cardinality v1.6 \u2014 "+inv.name+" \u2014 Confidential",W/2,H-6,{align:"center"});
+    pdf.text("Page "+p+"/"+tp,W-m,H-6,{align:"right"})}
+  pdf.save(`Cardinality_${inv.short}_${new Date().toISOString().slice(0,10)}.pdf`);
 }
+async function exportAllInvestorPDFs(){for(const k of["BHC","ACAP","BK"]){await exportInvestorPDF(k);await new Promise(r=>setTimeout(r,300))}}
 
 </script>
 </body>
