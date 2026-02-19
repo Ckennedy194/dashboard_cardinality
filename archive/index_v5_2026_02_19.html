@@ -207,7 +207,7 @@ Export &#9662;</button>
 <div class="grid md:grid-cols-2 gap-6">
 <div class="card"><div class="space-y-3 text-sm">
 <div class="flex justify-between"><span class="text-slate-400">Principal</span><span class="mono font-semibold">$10,000,000</span></div>
-<div class="flex justify-between"><span class="text-slate-400">Interest Rate</span><span class="mono">13.00%</span></div>
+<div class="flex justify-between"><span class="text-slate-400">Interest Rate</span><span class="mono">14.00%</span></div>
 <div class="flex justify-between"><span class="text-slate-400">Debt Start</span><span class="mono">Apr 1, 2023</span></div>
 <div class="flex justify-between"><span class="text-slate-400">Accrued Interest</span><span class="mono font-semibold" id="debtInterest">&mdash;</span></div>
 <div class="flex justify-between"><span class="text-slate-400">Total Obligation</span><span class="mono font-semibold text-amber-400" id="debtTotal">&mdash;</span></div>
@@ -726,8 +726,6 @@ function update(){
     <div class="flex justify-between"><span class="text-slate-400">A-1+W Converts?</span><span class="mono font-semibold ${w.a1wConverts?"text-emerald-400":"text-amber-400"}">${w.a1wConverts?"YES":"NO"}</span></div>
     <div class="flex justify-between"><span class="text-slate-400">Warrant Shares</span><span class="mono font-semibold">${N(w.wShares)}</span></div>
     <div class="flex justify-between"><span class="text-slate-400">Warrant Proceeds</span><span class="mono">${$(w.wPay)}</span></div>
-    <div class="flex justify-between"><span class="text-slate-400">B-6 Pro-Rata (8,658 sh)</span><span class="mono">${$(w.bhcB6)}</span></div>
-    <div class="flex justify-between"><span class="text-slate-400">Closing Fee</span><span class="mono">${$(BHC_CLOSING_FEE)}</span></div>
     ${w.moicCapActive?'<div class="p-2 rounded text-xs" style="background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);color:#3B82F6">\u2713 3.0x MOIC cap active \u2014 warrant reduced to '+N(w.wShares)+' shares</div>':w.wShares>0?'<div class="p-2 rounded text-xs" style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);color:#F59E0B">\u26a0\ufe0f Ratchet ACTIVE \u2014 '+N(w.wShares)+' shares (12.5% cap)</div>':'<div class="p-2 rounded text-xs" style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);color:#10B981">\u2713 No warrant needed \u2014 MOIC exceeds 3.0x naturally</div>'}
   </div>`;
 
