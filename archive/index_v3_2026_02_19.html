@@ -81,9 +81,7 @@ Privileged and Confidential — Preliminary Illustrative Analysis
 <a href="#ceo" class="nav-a text-slate-400">CEO</a>
 <a href="#debt" class="nav-a text-slate-400 hidden md:inline">Debt</a>
 <div class="relative" id="exportMenu">
-<!-- FIX #1: Button onclick was "exportPDF();toggleExportMenu()" so querySelector('[onclick="exportPDF()"]') would fail.
-     The export button now has id="exportFullBtn" and exportPDF() references it by id. -->
-<button id="exportFullBtn" onclick="toggleExportMenu()" class="ml-3 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5" title="Export options">
+<button onclick="toggleExportMenu()" class="ml-3 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5" title="Export options">
 <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
 Export &#9662;</button>
 <div id="exportDropdown" class="hidden absolute right-0 top-full mt-1 w-64 bg-slate-800 border border-slate-600 rounded-lg shadow-2xl z-50 overflow-hidden">
@@ -276,6 +274,8 @@ for(let e=50e6;e<=400e6;e+=10e6) CONFIG.evs.push(e);
 // ═══════════════════════════════════════════════════════════════
 // STAKEHOLDER HOLDINGS
 // ═══════════════════════════════════════════════════════════════
+// CURRENT: Post-Exchange 3/1/2026. ACAP = 0 common, 300,506 Pref B.
+// Excludes B-6 (69,262) and MOIC Warrant (50,529).
 const STK_CURRENT = [
   {n:"Attain Capital Partners, LLC",t:"Investor",c:0,a:0,b:300506,w:0,o:0},
   {n:"Thiag Loganathan",t:"Founder",c:200000,a:0,b:0,w:0,o:0},
@@ -313,25 +313,17 @@ const STK_CURRENT = [
 ];
 STK_CURRENT.forEach(s=>{s.io=s.c+s.a+s.b;s.fd=s.io+s.w+s.o});
 
-// B-6 allocation (2024 Note Conv)
-const B6_MAP={
-  "Attain Capital Partners, LLC":8658,
-  "BarronKent Ventures, LLC":1732,
-  "TGV, LLC":8658,
-  "Boathouse Capital III LP":8658
-};
+// B-6 allocation (2024 Note Conv): ACAP 8658, BK 1732, TGV 8658, Levine 3463, Girish 3463, Sawant 34630, BHC 8658
+const B6_MAP={"Attain Capital Partners, LLC":8658,"BarronKent Ventures, LLC":1732,
+  "TGV, LLC":8658,"Boathouse Capital III LP":8658};
 
 // POST-CONVERSION: Current + B-6 (69,262) + MOIC Warrant (50,529 to BHC)
 const STK_POSTCONV = JSON.parse(JSON.stringify(STK_CURRENT));
-for(const s of STK_POSTCONV){
-  if(B6_MAP[s.n]) s.b += B6_MAP[s.n];
-  if(s.n==="Boathouse Capital III LP") s.w += 50529;
-}
+for(const s of STK_POSTCONV){ if(B6_MAP[s.n]) s.b += B6_MAP[s.n]; if(s.n==="Boathouse Capital III LP") s.w += 50529; }
 // Add new B-6 holders
 STK_POSTCONV.push({n:"Sagar Sawant",t:"Investor",c:0,a:0,b:34630,w:0,o:0});
 STK_POSTCONV.push({n:"Richard Levine",t:"Investor",c:0,a:0,b:3463,w:0,o:0});
 STK_POSTCONV.push({n:"Girish Chandrasekhar",t:"Investor",c:0,a:0,b:3463,w:0,o:0});
-// FIX #2: Recalculate io/fd AFTER all pushes so newly added holders are included
 STK_POSTCONV.forEach(s=>{s.io=s.c+s.a+s.b;s.fd=s.io+s.w+s.o});
 
 const ACAP_BASIS=6500000, BHC_BASIS=10000000, BK_BASIS=2050000;
@@ -360,12 +352,19 @@ function yearfrac(d1, d2){
   return((y2-y1)*360+(m2-m1)*30+(dd2-dd1))/360;
 }
 
-// FIX #3: computeCEO had dead code that calculated then zeroed bonus in the first loop.
-// Removed the dead first loop entirely — only the correct second calculation remains.
+/** CEO SVPT tiered bonus */
 function computeCEO(ev){
   if(ev<CONFIG.ceoMinEV) return 0;
-  const rates=CONFIG.ceoTierRates;
   let bonus=0;
+  const rates=CONFIG.ceoTierRates;
+  for(let i=0;i<rates.length;i++){
+    const lo=CONFIG.ceoMinEV+i*CONFIG.ceoStep;
+    if(ev<=lo) break;
+    bonus+=Math.min(ev,lo+CONFIG.ceoStep-0.01)-lo;
+    bonus-=Math.min(ev,lo+CONFIG.ceoStep-0.01)-lo; // reset
+  }
+  // Redo correctly
+  bonus=0;
   for(let i=0;i<rates.length;i++){
     const lo=CONFIG.ceoMinEV+i*CONFIG.ceoStep;
     const hi=lo+CONFIG.ceoStep;
@@ -380,12 +379,19 @@ function computeCEO(ev){
 
 /** MOIC warrant shares (12.5% FD cap, uses conservative pre-warrant estimate) */
 function calcWarrantShares(fdPre){
+  // Always use cap-based shares: (12.5% * FD - existing pref) / (1 - 12.5%)
   const mx=Math.round((CONFIG.maxBhcFdPct*fdPre-CONFIG.bhcExistingPrefShares)/(1-CONFIG.maxBhcFdPct));
   return Math.max(0,mx);
 }
 
 /**
  * Full waterfall using the Iterative Conversion Engine logic.
+ * Matches the "Iterative Conversion" tab exactly:
+ *   Phase 1:  A-1 pre-warrant test (preliminary, for MOIC calc only)
+ *   Phase 2:  MOIC warrant calculation (conservative MIN approach)
+ *   Phase 2b: A-1 + Warrant bundled final conversion test
+ *   Phase 3:  B-series sequential conversion (ascending OIP)
+ *   Phase 4:  3x MOIC cap adjustment
  */
 function computeWaterfall(ev, exitDate){
   const yf=yearfrac(CONFIG.exchangeDate,exitDate);
@@ -414,25 +420,29 @@ function computeWaterfall(ev, exitDate){
     return r;
   }
 
-  const baseRes=CONFIG.commonShares+CONFIG.esopAllocated+CONFIG.esopOptions+CONFIG.esopAvailable+CONFIG.otherWarrants;
+  const baseRes=CONFIG.commonShares+CONFIG.esopAllocated+CONFIG.esopOptions+CONFIG.esopAvailable+CONFIG.otherWarrants; // 832,222
   let totalPref=0;
   for(const k of CONFIG.trancheKeys) totalPref+=CONFIG.tranches[k].shares;
-  const fdPreWarrant=baseRes+totalPref;
+  const fdPreWarrant=baseRes+totalPref; // 1,401,573
 
   // ═══ PHASE 1: A-1 Pre-Warrant Conversion Test ═══
+  // Hypothetical: if A-1 converts, what's it worth? (ignoring warrant)
   const a1PsPhase1=eqAvail/(baseRes+CONFIG.tranches.A1.shares);
   const a1AsConvPhase1=CONFIG.tranches.A1.shares*a1PsPhase1;
   const phase1Conv=a1AsConvPhase1>trD.A1.liqPref;
   const a1PreWarrantPayout=phase1Conv?a1AsConvPhase1:Math.min(trD.A1.liqPref,eqAvail);
 
   // ═══ PHASE 2: MOIC Warrant Calculation ═══
+  // Conservative: use MIN(pre-warrant payout, liq pref) to avoid overestimating BHC position
   const bhcPreWarrantProceeds=debt+debtInt+Math.min(a1PreWarrantPayout,trD.A1.liqPref);
   const preWarrantMOIC=bhcPreWarrantProceeds/CONFIG.bhcBasis;
   let wSh=0;
   if(preWarrantMOIC<CONFIG.moicTarget){
+    // Cap-based: 12.5% ownership cap
     wSh=calcWarrantShares(fdPreWarrant);
   }
 
+  // Warrant liq pref (no PIK — uses OIP * liqPrefMultiple only)
   const wLiqPref=wSh*CONFIG.tranches.A1.oip*CONFIG.liqPrefMultiple;
 
   // ═══ PHASE 2b: A-1 + Warrant Combined Final Conversion Test ═══
@@ -443,45 +453,54 @@ function computeWaterfall(ev, exitDate){
   const a1wAsConv=combinedShares*postWPs;
   const a1wConverts=a1wAsConv>combinedLiqPref;
 
+  // After A-1+W decision, determine equity available for B-series
   let eqForB=a1wConverts?eqAvail:eqAvail-Math.min(combinedLiqPref,eqAvail);
   let runFD=a1wConverts?baseRes+combinedShares:baseRes;
 
   // ═══ PHASE 3: B-Series Sequential Conversion (ascending OIP) ═══
-  const bOrder=["B1","B2","B6","B3","B4","B5"];
+  const bOrder=["B1","B2","B6","B3","B4","B5"]; // ascending OIP order
   let conv={};
   conv.A1=a1wConverts;
   const bPayouts={};
 
   for(const k of bOrder){
     const t=trD[k];
+    // As-converted value = tranche's pro-rata share of remaining equity
     const asConv=t.shares/(runFD+t.shares)*eqForB;
     const converts=asConv>t.liqPref;
     conv[k]=converts;
 
     if(converts){
-      bPayouts[k]=asConv;
+      // Converts: shares join common pool, equity unchanged
+      bPayouts[k]=asConv; // will be recalculated at residual per-share
       runFD+=t.shares;
+      // eqForB stays the same (converting tranches participate in residual)
     } else {
+      // Takes liq pref
       const paid=Math.min(t.liqPref,eqForB);
       bPayouts[k]=paid;
       eqForB-=paid;
+      // runFD stays the same
     }
   }
 
   // ═══ RESIDUAL CALCULATION ═══
-  const resPool=eqForB;
-  const resSh=runFD;
+  const resPool=eqForB; // what's left after all non-converting B liq prefs
+  const resSh=runFD;    // base + all converting shares
   const rps=resSh>0?resPool/resSh:0;
 
   // Recalculate all payouts at residual per-share
   const trPay={};
+  // A-1
   if(a1wConverts){
     trPay.A1=CONFIG.tranches.A1.shares*rps;
   } else {
+    // Pro-rata split of combined liq pref: A-1 gets its share
     if(combinedLiqPref===0) trPay.A1=0;
     else trPay.A1=trD.A1.liqPref/combinedLiqPref*Math.min(combinedLiqPref,eqAvail);
   }
 
+  // Warrant payout
   let wPay;
   if(a1wConverts){
     wPay=wSh*rps;
@@ -490,11 +509,12 @@ function computeWaterfall(ev, exitDate){
     else wPay=wLiqPref/combinedLiqPref*Math.min(combinedLiqPref,eqAvail);
   }
 
+  // B-series payouts
   for(const k of bOrder){
     if(conv[k]){
       trPay[k]=CONFIG.tranches[k].shares*rps;
     } else {
-      trPay[k]=bPayouts[k];
+      trPay[k]=bPayouts[k]; // already calculated as MIN(liq pref, remaining equity)
     }
   }
 
@@ -509,13 +529,16 @@ function computeWaterfall(ev, exitDate){
 
   if(prelimMOIC>CONFIG.moicTarget){
     moicCapActive=true;
+    // Target BHC equity (A-1 + W) to achieve exactly 3.0x
     const targetBhcEquity=CONFIG.moicTarget*CONFIG.bhcBasis-debt-debtInt;
+    // How many warrant shares needed at current rps to reach target?
     if(rps>0){
       const adjW=Math.max(0,Math.round(targetBhcEquity/rps-CONFIG.tranches.A1.shares));
       finalWarrant=Math.min(wSh,adjW);
     } else {
       finalWarrant=0;
     }
+    // Recalculate warrant payout
     const oldWPay=wPay;
     if(a1wConverts){
       wPay=finalWarrant*rps;
@@ -538,6 +561,7 @@ function computeWaterfall(ev, exitDate){
   let bkTot=0;
   for(const [tk,sh] of Object.entries(bkTr)) bkTot+=trPay[tk]*(sh/CONFIG.tranches[tk].shares);
 
+  // Total liq prefs for display
   const a1Liq=a1wConverts?0:trD.A1.liqPref;
   let bLiq=0;
   for(const k of bOrder){if(!conv[k]) bLiq+=trD[k].liqPref}
@@ -554,7 +578,6 @@ function computeAllEVs(exitDate){return CONFIG.evs.map(ev=>computeWaterfall(ev,e
 // CHART REGISTRY & COLORS
 // ═══════════════════════════════════════════════════════════════
 let charts={};
-// FIX #4: dc() now clears by canvas id directly matching how charts are stored
 function dc(id){if(charts[id]){charts[id].destroy();delete charts[id]}}
 const CC={em:"#10B981",bl:"#3B82F6",pu:"#8B5CF6",am:"#F59E0B",rd:"#EF4444",cy:"#06B6D4",grid:"#33415533",txt:"#94A3B8"};
 
@@ -689,7 +712,7 @@ function update(){
     <div class="text-xs text-slate-500 mt-1">Basis: ${$(v.basis)}</div></div>`;
   }).join("");
 
-  // FIX #5: Removed the stray extra backtick at end of wInfo innerHTML assignment
+  // Warrant
   const bM=w.bhcTot/BHC_BASIS;
   document.getElementById("wInfo").innerHTML=`<div class="space-y-3 text-sm">
     <div class="flex justify-between"><span class="text-slate-400">BHC MOIC</span><span class="mono font-semibold ${bM<3?"text-amber-400":"text-emerald-400"}">${X(bM)}</span></div>
@@ -698,8 +721,7 @@ function update(){
     <div class="flex justify-between"><span class="text-slate-400">Warrant Shares</span><span class="mono font-semibold">${N(w.wShares)}</span></div>
     <div class="flex justify-between"><span class="text-slate-400">Warrant Proceeds</span><span class="mono">${$(w.wPay)}</span></div>
     ${w.moicCapActive?'<div class="p-2 rounded text-xs" style="background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);color:#3B82F6">\u2713 3.0x MOIC cap active \u2014 warrant reduced to '+N(w.wShares)+' shares</div>':w.wShares>0?'<div class="p-2 rounded text-xs" style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);color:#F59E0B">\u26a0\ufe0f Ratchet ACTIVE \u2014 '+N(w.wShares)+' shares (12.5% cap)</div>':'<div class="p-2 rounded text-xs" style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);color:#10B981">\u2713 No warrant needed \u2014 MOIC exceeds 3.0x naturally</div>'}
-  </div>`;
-
+  </div>``;
   const cp=ev>0?w.ceo/ev:0;
   document.getElementById("ceoCta").textContent=`${$(w.ceo)} (${(cp*100).toFixed(2)}% of EV)`;
 
@@ -714,16 +736,15 @@ function updateCharts(w,exitDate){
   const ai=CONFIG.evs.indexOf(w.ev);
   const lbls=CONFIG.evs.map(e=>$M(e));
 
-  // FIX #6: All chart keys now match between dc() calls and charts.XXX assignments
-  // Mini waterfall (canvas id: miniWF, chart key: miniWF)
-  dc("miniWF");
+  // Mini waterfall
+  dc("mini");
   const mL=["EV","Fees","CEO","Debt","Pref Liq","Residual"];
   const mV=[w.ev,-w.fees,-w.ceo,-w.debt,-w.totLiq,w.resPool];
   let run=0;const mB=[],mH=[],mC=[];
   mV.forEach((v,i)=>{if(i===0){mB.push(0);mH.push(v);mC.push(CC.em);run=v}
     else if(i===5){mB.push(0);mH.push(v);mC.push(CC.bl)}
     else{run+=v;mB.push(run);mH.push(-v);mC.push(CC.rd+"88")}});
-  charts.miniWF=new Chart(document.getElementById("miniWF"),{type:"bar",data:{labels:mL,datasets:[
+  charts.mini=new Chart(document.getElementById("miniWF"),{type:"bar",data:{labels:mL,datasets:[
     {data:mB,backgroundColor:"transparent",borderWidth:0,stack:"a"},
     {data:mH,backgroundColor:mC,stack:"a",borderRadius:4}
   ]},options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},
@@ -731,15 +752,15 @@ function updateCharts(w,exitDate){
     scales:{x:{stacked:true,ticks:{color:CC.txt,callback:v=>$M(v)},grid:{color:CC.grid}},
     y:{stacked:true,ticks:{color:CC.txt,font:{size:11}},grid:{display:false}}}}});
 
-  // Waterfall chart (canvas id: wfChart, chart key: wfChart)
-  dc("wfChart");
+  // Waterfall chart
+  dc("wf");
   const wL=["EV","Fees","CEO","Debt","A-1 Liq","B Liq","= Residual"];
   const wV=[w.ev,-w.fees,-w.ceo,-w.debt,-w.a1Liq,-w.bLiq,w.resPool];
   run=0;const wB=[],wH=[],wC=[];
   wV.forEach((v,i)=>{if(i===0){wB.push(0);wH.push(v);wC.push(CC.em);run=v}
     else if(i===6){wB.push(0);wH.push(v);wC.push(CC.bl)}
     else{run+=v;wB.push(run);wH.push(-v);wC.push(CC.rd+"77")}});
-  charts.wfChart=new Chart(document.getElementById("wfChart"),{type:"bar",data:{labels:wL,datasets:[
+  charts.wf=new Chart(document.getElementById("wfChart"),{type:"bar",data:{labels:wL,datasets:[
     {data:wB,backgroundColor:"transparent",borderWidth:0,stack:"a"},
     {data:wH,backgroundColor:wC,stack:"a",borderRadius:6}
   ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},
@@ -748,9 +769,9 @@ function updateCharts(w,exitDate){
     scales:{x:{stacked:true,ticks:{color:CC.txt},grid:{display:false}},
     y:{stacked:true,ticks:{color:CC.txt,callback:v=>$M(v)},grid:{color:CC.grid}}}}});
 
-  // MOIC line (canvas id: moicLine, chart key: moicLine)
-  dc("moicLine");
-  charts.moicLine=new Chart(document.getElementById("moicLine"),{type:"line",data:{labels:lbls,datasets:[
+  // MOIC
+  dc("moic");
+  charts.moic=new Chart(document.getElementById("moicLine"),{type:"line",data:{labels:lbls,datasets:[
     {label:"BHC",data:all.map(r=>r.bhcTot/BHC_BASIS),borderColor:CC.bl,tension:.3,pointRadius:CONFIG.evs.map((_,i)=>i===ai?6:1.5)},
     {label:"ACAP",data:all.map(r=>r.acapTot/ACAP_BASIS),borderColor:CC.em,tension:.3,pointRadius:CONFIG.evs.map((_,i)=>i===ai?6:1.5)},
     {label:"BarronKent",data:all.map(r=>r.bkTot/BK_BASIS),borderColor:CC.pu,tension:.3,pointRadius:CONFIG.evs.map((_,i)=>i===ai?6:1.5)}
@@ -758,9 +779,9 @@ function updateCharts(w,exitDate){
     plugins:{legend:{position:"top",labels:{color:CC.txt}},title:{display:true,text:"MOIC by Exit EV",color:CC.txt}},
     scales:{x:{ticks:{color:CC.txt,maxTicksLimit:8},grid:{color:CC.grid}},y:{ticks:{color:CC.txt,callback:v=>v.toFixed(1)+"x"},grid:{color:CC.grid}}}}});
 
-  // Dollar chart (canvas id: dollarChart, chart key: dollarChart)
-  dc("dollarChart");
-  charts.dollarChart=new Chart(document.getElementById("dollarChart"),{type:"line",data:{labels:lbls,datasets:[
+  // Dollar
+  dc("dollar");
+  charts.dollar=new Chart(document.getElementById("dollarChart"),{type:"line",data:{labels:lbls,datasets:[
     {label:"BHC",data:all.map(r=>r.bhcTot),borderColor:CC.bl,backgroundColor:CC.bl+"22",fill:true,tension:.3},
     {label:"ACAP",data:all.map(r=>r.acapTot),borderColor:CC.em,backgroundColor:CC.em+"22",fill:true,tension:.3},
     {label:"BarronKent",data:all.map(r=>r.bkTot),borderColor:CC.pu,backgroundColor:CC.pu+"22",fill:true,tension:.3},
@@ -769,9 +790,9 @@ function updateCharts(w,exitDate){
     plugins:{legend:{position:"top",labels:{color:CC.txt}},title:{display:true,text:"Dollar Returns",color:CC.txt}},
     scales:{x:{ticks:{color:CC.txt,maxTicksLimit:8},grid:{color:CC.grid}},y:{ticks:{color:CC.txt,callback:v=>$M(v)},grid:{color:CC.grid}}}}});
 
-  // Warrant chart (canvas id: wChart, chart key: wChart)
-  dc("wChart");
-  charts.wChart=new Chart(document.getElementById("wChart"),{type:"bar",data:{labels:lbls,datasets:[
+  // Warrant
+  dc("warrant");
+  charts.warrant=new Chart(document.getElementById("wChart"),{type:"bar",data:{labels:lbls,datasets:[
     {label:"Warrant Shares",data:all.map(r=>r.wShares),backgroundColor:CC.am+"66",yAxisID:"y",borderRadius:3},
     {label:"BHC MOIC",data:all.map(r=>r.bhcTot/BHC_BASIS),type:"line",borderColor:CC.bl,yAxisID:"y1",tension:.3,pointRadius:CONFIG.evs.map((_,i)=>i===ai?5:1)}
   ]},options:{responsive:true,maintainAspectRatio:false,
@@ -780,10 +801,10 @@ function updateCharts(w,exitDate){
     y:{position:"left",ticks:{color:CC.am},grid:{color:CC.grid},title:{display:true,text:"Shares",color:CC.am}},
     y1:{position:"right",ticks:{color:CC.bl,callback:v=>v.toFixed(1)+"x"},grid:{display:false},title:{display:true,text:"MOIC",color:CC.bl}}}}});
 
-  // CEO chart (canvas id: ceoChart, chart key: ceoChart)
-  dc("ceoChart");
+  // CEO
+  dc("ceo");
   const ceoD=CONFIG.evs.map(ev=>computeCEO(ev));
-  charts.ceoChart=new Chart(document.getElementById("ceoChart"),{type:"bar",data:{labels:lbls,datasets:[
+  charts.ceo=new Chart(document.getElementById("ceoChart"),{type:"bar",data:{labels:lbls,datasets:[
     {label:"CEO Bonus",data:ceoD,backgroundColor:CC.em+"66",yAxisID:"y",borderRadius:3},
     {label:"% of EV",data:CONFIG.evs.map((ev,i)=>ev>0?ceoD[i]/ev*100:0),type:"line",borderColor:CC.am,yAxisID:"y1",tension:.3,pointRadius:CONFIG.evs.map((_,i)=>i===ai?5:1)}
   ]},options:{responsive:true,maintainAspectRatio:false,
@@ -792,18 +813,17 @@ function updateCharts(w,exitDate){
     y:{position:"left",ticks:{color:CC.em,callback:v=>$M(v)},grid:{color:CC.grid},title:{display:true,text:"Bonus",color:CC.em}},
     y1:{position:"right",min:0,max:6,ticks:{color:CC.am,callback:v=>v.toFixed(1)+"%"},grid:{display:false},title:{display:true,text:"% EV",color:CC.am}}}}});
 
-  // Debt chart (canvas id: debtChart, chart key: debtChart)
-  dc("debtChart");
-  charts.debtChart=new Chart(document.getElementById("debtChart"),{type:"bar",data:{labels:["Apr 2023","Exit"],datasets:[
+  // Debt
+  dc("debt");
+  const yfd=w.yfDebt;
+  charts.debt=new Chart(document.getElementById("debtChart"),{type:"bar",data:{labels:["Apr 2023","Exit"],datasets:[
     {label:"Principal",data:[10e6,10e6],backgroundColor:CC.bl+"88",stack:"a"},
     {label:"Interest",data:[0,w.debtInt],backgroundColor:CC.am+"88",stack:"a"}
   ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"top",labels:{color:CC.txt}}},
     scales:{x:{ticks:{color:CC.txt},grid:{color:CC.grid}},y:{ticks:{color:CC.txt,callback:v=>$M(v)},grid:{color:CC.grid}}}}});
 }
 
-// ═══════════════════════════════════════════════════════════════
-// TABLE SORTING
-// ═══════════════════════════════════════════════════════════════
+// Sorting
 let sC=-1,sA=true;
 function srt(col){
   if(sC===col)sA=!sA;else{sC=col;sA=true}
@@ -835,80 +855,43 @@ document.addEventListener("DOMContentLoaded",()=>{
 // EXPORT
 // ═══════════════════════════════════════════════════════════════
 function toggleExportMenu(){
-  const dd=document.getElementById("exportDropdown");
-  dd.classList.toggle("hidden");
-  if(!dd.classList.contains("hidden")){
-    setTimeout(()=>{
-      const cl=e=>{
-        if(!document.getElementById("exportMenu").contains(e.target)){
-          dd.classList.add("hidden");
-          document.removeEventListener("click",cl);
-        }
-      };
-      document.addEventListener("click",cl);
-    },10);
-  }
+  const dd=document.getElementById("exportDropdown");dd.classList.toggle("hidden");
+  if(!dd.classList.contains("hidden")){setTimeout(()=>{
+    const cl=e=>{if(!document.getElementById("exportMenu").contains(e.target)){dd.classList.add("hidden");document.removeEventListener("click",cl)}};
+    document.addEventListener("click",cl)},10)}
 }
-
-// FIX #7: exportPDF() now uses getElementById("exportFullBtn") instead of
-// querySelector('[onclick="exportPDF()"]') which never matched because the
-// button's actual onclick was "exportPDF();toggleExportMenu()"
 async function exportPDF(){
-  const btn=document.getElementById("exportFullBtn");
-  const orig=btn?btn.innerHTML:"";
-  if(btn){btn.innerHTML="Generating...";btn.disabled=true;}
+  const btn=document.querySelector('[onclick="exportPDF()"]');const orig=btn.innerHTML;
+  btn.innerHTML="Generating...";btn.disabled=true;
   try{
-    const wasL=document.body.classList.contains("light");
-    document.body.classList.add("light");
-    const hide=document.querySelectorAll("nav,.slider-wrap");
-    hide.forEach(el=>el.style.display="none");
+    const wasL=document.body.classList.contains("light");document.body.classList.add("light");
+    const hide=document.querySelectorAll("nav,.slider-wrap");hide.forEach(el=>el.style.display="none");
     const evV=document.getElementById("evDisp").textContent;
-    const hdr=document.createElement("div");
-    hdr.id="pdf-header";
+    const hdr=document.createElement("div");hdr.id="pdf-header";
     hdr.style.cssText="padding:24px 0 16px;text-align:center;border-bottom:2px solid #E2E8F0;margin-bottom:16px";
     hdr.innerHTML=`<div style="font-size:24px;font-weight:800;color:#0F172A">\u25c6 Cardinality \u2014 Waterfall Analysis</div>
       <div style="font-size:14px;color:#64748B;margin-top:4px">EV: <b style="color:#059669">${evV}</b> \u00b7 Exit: ${document.getElementById("exitDatePicker").value}</div>
       <div style="font-size:10px;color:#F59E0B;margin-top:6px;text-transform:uppercase;letter-spacing:2px">Confidential</div>`;
-    const ct=document.querySelector(".max-w-7xl.mx-auto.px-4.py-8");
-    ct.parentNode.insertBefore(hdr,ct);
+    const ct=document.querySelector(".max-w-7xl.mx-auto.px-4.py-8");ct.parentNode.insertBefore(hdr,ct);
     await new Promise(r=>setTimeout(r,500));
-    const{jsPDF}=window.jspdf;
-    const pdf=new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});
+    const{jsPDF}=window.jspdf;const pdf=new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});
     const W=pdf.internal.pageSize.getWidth(),H=pdf.internal.pageSize.getHeight(),mg=8,uw=W-mg*2;
-    const secs=ct.querySelectorAll("section");
-    let yP=mg;
+    const secs=ct.querySelectorAll("section");let yP=mg;
     const hC=await html2canvas(hdr,{scale:2,useCORS:true,backgroundColor:"#FFFFFF",logging:false});
     const hR=hC.height/hC.width,hH=uw*hR;
-    pdf.addImage(hC.toDataURL("image/png"),"PNG",mg,yP,uw,hH);
-    yP+=hH+4;
+    pdf.addImage(hC.toDataURL("image/png"),"PNG",mg,yP,uw,hH);yP+=hH+4;
     for(let i=0;i<secs.length;i++){
       const cv=await html2canvas(secs[i],{scale:2,useCORS:true,backgroundColor:"#FFFFFF",logging:false});
       const r=cv.height/cv.width,ih=uw*r;
       if(yP+ih>H-mg&&yP>mg+10){pdf.addPage();yP=mg}
-      if(ih>H-mg*2){
-        const sc=(H-mg*2)/ih;
-        pdf.addImage(cv.toDataURL("image/png"),"PNG",mg+(uw-uw*sc)/2,yP,uw*sc,ih*sc);
-        yP+=ih*sc+4;
-      } else {
-        pdf.addImage(cv.toDataURL("image/png"),"PNG",mg,yP,uw,ih);
-        yP+=ih+4;
-      }
+      if(ih>H-mg*2){const sc=(H-mg*2)/ih;pdf.addImage(cv.toDataURL("image/png"),"PNG",mg+(uw-uw*sc)/2,yP,uw*sc,ih*sc);yP+=ih*sc+4}
+      else{pdf.addImage(cv.toDataURL("image/png"),"PNG",mg,yP,uw,ih);yP+=ih+4}
     }
     const tp=pdf.internal.getNumberOfPages();
-    for(let p=1;p<=tp;p++){
-      pdf.setPage(p);pdf.setFontSize(8);pdf.setTextColor(150);
-      pdf.text(`Page ${p}/${tp}`,W/2,H-4,{align:"center"});
-    }
+    for(let p=1;p<=tp;p++){pdf.setPage(p);pdf.setFontSize(8);pdf.setTextColor(150);pdf.text(`Page ${p}/${tp}`,W/2,H-4,{align:"center"})}
     pdf.save(`Cardinality_Waterfall_${new Date().toISOString().slice(0,10)}.pdf`);
-    hdr.remove();
-    hide.forEach(el=>el.style.display="");
-    if(!wasL)document.body.classList.remove("light");
-  }catch(e){
-    console.error(e);
-    alert("PDF generation failed: "+e.message);
-  }finally{
-    if(btn){btn.innerHTML=orig;btn.disabled=false;}
-  }
+    hdr.remove();hide.forEach(el=>el.style.display="");if(!wasL)document.body.classList.remove("light");
+  }catch(e){console.error(e);alert("PDF failed")}finally{btn.innerHTML=orig;btn.disabled=false}
 }
 
 const INVESTOR_PROFILES={
@@ -941,8 +924,7 @@ const INVESTOR_PROFILES={
 async function exportInvestorPDF(key){
   const inv=INVESTOR_PROFILES[key];if(!inv)return;
   const ev=getEV(),exitDate=getExitDate(),w=computeWaterfall(ev,exitDate),ret=inv.getRet(w);
-  const{jsPDF}=window.jspdf;
-  const pdf=new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});
+  const{jsPDF}=window.jspdf;const pdf=new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});
   const W=pdf.internal.pageSize.getWidth(),H=pdf.internal.pageSize.getHeight(),m=15,cw=W-m*2;
   let y=m;
   const sf=(sz,st,cl)=>{pdf.setFontSize(sz);pdf.setFont("helvetica",st||"normal");pdf.setTextColor(cl||"#1E293B")};
@@ -963,7 +945,7 @@ async function exportInvestorPDF(key){
     sf(7,"bold","#94A3B8");pdf.text(mt.l,bx+3,y+6);sf(12,"bold",mt.cl);pdf.text(mt.v,bx+3,y+14);
   });y+=26;
 
-  // Proceeds breakdown
+  // Proceeds
   sf(12,"bold");pdf.text("Proceeds Breakdown",m,y);y+=5;dl(y,inv.color);y+=4;
   ret.comp.forEach((c,i)=>{
     if(i%2===0){pdf.setFillColor("#FAFAFA");pdf.rect(m,y-2,cw,7,"F")}
@@ -974,7 +956,7 @@ async function exportInvestorPDF(key){
   pdf.setFillColor(inv.accent);pdf.rect(m,y-1,cw,8,"F");
   sf(10,"bold","#FFFFFF");pdf.text("TOTAL",m+3,y+5);pdf.text($(ret.tot),m+cw-35,y+5,{align:"right"});y+=14;
 
-  // Sensitivity table
+  // Sensitivity
   cp(60);sf(12,"bold");pdf.text("Sensitivity",m,y);y+=5;dl(y,inv.color);y+=4;
   pdf.setFillColor(inv.accent);pdf.rect(m,y,cw,7,"F");
   sf(8,"bold","#FFFFFF");["EV","Proceeds","MOIC","Gain"].forEach((c,i)=>pdf.text(c,[m+3,m+35,m+75,m+105][i],y+5));y+=9;
@@ -992,20 +974,13 @@ async function exportInvestorPDF(key){
   });
 
   const tp=pdf.internal.getNumberOfPages();
-  for(let p=1;p<=tp;p++){
-    pdf.setPage(p);sf(7,"normal","#94A3B8");
+  for(let p=1;p<=tp;p++){pdf.setPage(p);sf(7,"normal","#94A3B8");
     pdf.text("Cardinality v1.9 \u2014 "+inv.name+" \u2014 Confidential",W/2,H-6,{align:"center"});
-    pdf.text("Page "+p+"/"+tp,W-m,H-6,{align:"right"});
-  }
+    pdf.text("Page "+p+"/"+tp,W-m,H-6,{align:"right"})}
   pdf.save(`Cardinality_${inv.short}_${new Date().toISOString().slice(0,10)}.pdf`);
 }
+async function exportAllInvestorPDFs(){for(const k of["BHC","ACAP","BK"]){await exportInvestorPDF(k);await new Promise(r=>setTimeout(r,300))}}
 
-async function exportAllInvestorPDFs(){
-  for(const k of["BHC","ACAP","BK"]){
-    await exportInvestorPDF(k);
-    await new Promise(r=>setTimeout(r,300));
-  }
-}
 </script>
 </body>
 </html>
