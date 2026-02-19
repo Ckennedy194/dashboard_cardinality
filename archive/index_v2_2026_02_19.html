@@ -251,9 +251,9 @@ const CONFIG = {
 
   // ── Share Counts (Post-Exchange, Pre-B6) ──
   commonShares: 777334,
-  esopAllocated: 0,      // Included in commonShares (777,334)
-  esopOptions: 54055,    // All options (ESOP allocated 37,700 + available 16,355)
-  esopAvailable: 0,      // Rolled into esopOptions above
+  esopAllocated: 1500,
+  esopOptions: 37700,
+  esopAvailable: 16355,
   otherWarrants: 833,
 
   // ── Tranche Definitions ──
@@ -263,7 +263,7 @@ const CONFIG = {
     B2:{name:"Series B-2",shares:50000,oip:20.00,inv:1000000,baseLiq:2000000,cls:"B"},
     B3:{name:"Series B-3",shares:26250,oip:40.00,inv:1050000,baseLiq:2100000,cls:"B"},
     B4:{name:"Series B-4",shares:74730,oip:40.79,inv:3048237,baseLiq:6096473,cls:"B"},
-    B5:{name:"Series B-5",shares:18125,oip:68.21,inv:1236306,baseLiq:2472612,cls:"B"},
+    B5:{name:"Series B-5",shares:18125,oip:68.21,inv:1236306,baseLiq:2472613,cls:"B"},
     B6:{name:"Series B-6",shares:69262,oip:37.53,inv:2599318,baseLiq:5198636,cls:"B"}
   },
   trancheKeys: ["A1","B1","B2","B3","B4","B5","B6"],
@@ -377,30 +377,22 @@ function computeCEO(ev){
   return Math.min(bonus+CONFIG.ceoFloor,ev*CONFIG.ceoCap);
 }
 
-/** MOIC warrant shares (12.5% FD cap, uses conservative pre-warrant estimate) */
-function calcWarrantShares(fdPre){
-  // Always use cap-based shares: (12.5% * FD - existing pref) / (1 - 12.5%)
+/** MOIC warrant shares (12.5% FD cap) */
+function calcWarrantShares(bhcPreProceeds){
+  if(bhcPreProceeds/CONFIG.bhcBasis>=CONFIG.moicTarget) return 0;
+  let totalPref=0;
+  for(const k of CONFIG.trancheKeys) totalPref+=CONFIG.tranches[k].shares;
+  const fdPre=CONFIG.commonShares+CONFIG.esopAllocated+CONFIG.esopOptions+CONFIG.esopAvailable+CONFIG.otherWarrants+totalPref;
   const mx=Math.round((CONFIG.maxBhcFdPct*fdPre-CONFIG.bhcExistingPrefShares)/(1-CONFIG.maxBhcFdPct));
   return Math.max(0,mx);
 }
 
-/**
- * Full waterfall using the Iterative Conversion Engine logic.
- * Matches the "Iterative Conversion" tab exactly:
- *   Phase 1:  A-1 pre-warrant test (preliminary, for MOIC calc only)
- *   Phase 2:  MOIC warrant calculation (conservative MIN approach)
- *   Phase 2b: A-1 + Warrant bundled final conversion test
- *   Phase 3:  B-series sequential conversion (ascending OIP)
- *   Phase 4:  3x MOIC cap adjustment
- */
+/** Full waterfall for given EV and exit date */
 function computeWaterfall(ev, exitDate){
   const yf=yearfrac(CONFIG.exchangeDate,exitDate);
   const yfDebt=yearfrac(CONFIG.debtStartDate,exitDate);
   const pikFactor=Math.pow(1+CONFIG.pikRate,yf);
-  const debt=CONFIG.debtPrincipal;
-  const debtInt=debt*CONFIG.debtRate*yfDebt;
 
-  // Build tranche data with PIK'd liq prefs
   const trD={};
   for(const k of CONFIG.trancheKeys){
     const t=CONFIG.tranches[k];
@@ -409,150 +401,56 @@ function computeWaterfall(ev, exitDate){
 
   const fees=ev*CONFIG.feeRate;
   const ceo=computeCEO(ev);
+  const debt=CONFIG.debtPrincipal;
   const eqAvail=ev-fees-ceo-debt;
 
-  // Edge case: no equity
   if(eqAvail<=0){
-    const r={ev,fees,ceo,debt,eqAvail:Math.max(0,eqAvail),a1Liq:0,bLiq:0,totLiq:0,resPool:0,resShares:0,rps:0,
-      conv:{},trD,trPay:{},wShares:0,wPay:0,bhcEq:0,bhcTot:debt+debtInt,acapTot:0,bkTot:0,
-      comPay:0,pikFactor,yf,yfDebt,debtInt,phase1Conv:false,moicCapActive:false,finalWarrant:0};
+    const r={ev,fees,ceo,debt,eqAvail,a1Liq:0,bLiq:0,totLiq:0,resPool:0,resShares:0,rps:0,
+      conv:{},trD,trPay:{},wShares:0,wPay:0,bhcEq:0,bhcTot:debt+debt*CONFIG.debtRate*yfDebt,acapTot:0,bkTot:0,
+      comPay:0,pikFactor,yf,yfDebt,debtInt:debt*CONFIG.debtRate*yfDebt};
     for(const k of CONFIG.trancheKeys){r.conv[k]=false;r.trPay[k]=0}
     return r;
   }
 
-  const baseRes=CONFIG.commonShares+CONFIG.esopAllocated+CONFIG.esopOptions+CONFIG.esopAvailable+CONFIG.otherWarrants; // 832,222
-  let totalPref=0;
-  for(const k of CONFIG.trancheKeys) totalPref+=CONFIG.tranches[k].shares;
-  const fdPreWarrant=baseRes+totalPref; // 1,401,573
-
-  // ═══ PHASE 1: A-1 Pre-Warrant Conversion Test ═══
-  // Hypothetical: if A-1 converts, what's it worth? (ignoring warrant)
-  const a1PsPhase1=eqAvail/(baseRes+CONFIG.tranches.A1.shares);
-  const a1AsConvPhase1=CONFIG.tranches.A1.shares*a1PsPhase1;
-  const phase1Conv=a1AsConvPhase1>trD.A1.liqPref;
-  const a1PreWarrantPayout=phase1Conv?a1AsConvPhase1:Math.min(trD.A1.liqPref,eqAvail);
-
-  // ═══ PHASE 2: MOIC Warrant Calculation ═══
-  // Conservative: use MIN(pre-warrant payout, liq pref) to avoid overestimating BHC position
-  const bhcPreWarrantProceeds=debt+debtInt+Math.min(a1PreWarrantPayout,trD.A1.liqPref);
-  const preWarrantMOIC=bhcPreWarrantProceeds/CONFIG.bhcBasis;
-  let wSh=0;
-  if(preWarrantMOIC<CONFIG.moicTarget){
-    // Cap-based: 12.5% ownership cap
-    wSh=calcWarrantShares(fdPreWarrant);
-  }
-
-  // Warrant liq pref (no PIK — uses OIP * liqPrefMultiple only)
-  const wLiqPref=wSh*CONFIG.tranches.A1.oip*CONFIG.liqPrefMultiple;
-
-  // ═══ PHASE 2b: A-1 + Warrant Combined Final Conversion Test ═══
-  const combinedShares=CONFIG.tranches.A1.shares+wSh;
-  const combinedLiqPref=trD.A1.liqPref+wLiqPref;
-  const fdPostWarrant=fdPreWarrant+wSh;
-  const postWPs=eqAvail/fdPostWarrant;
-  const a1wAsConv=combinedShares*postWPs;
-  const a1wConverts=a1wAsConv>combinedLiqPref;
-
-  // After A-1+W decision, determine equity available for B-series
-  let eqForB=a1wConverts?eqAvail:eqAvail-Math.min(combinedLiqPref,eqAvail);
-  let runFD=a1wConverts?baseRes+combinedShares:baseRes;
-
-  // ═══ PHASE 3: B-Series Sequential Conversion (ascending OIP) ═══
-  const bOrder=["B1","B2","B6","B3","B4","B5"]; // ascending OIP order
+  const baseRes=CONFIG.commonShares+CONFIG.esopAllocated+CONFIG.esopOptions+CONFIG.esopAvailable+CONFIG.otherWarrants;
   let conv={};
-  conv.A1=a1wConverts;
-  const bPayouts={};
+  for(const k of CONFIG.trancheKeys) conv[k]=false;
+  let wSh=0;
 
-  for(const k of bOrder){
-    const t=trD[k];
-    // As-converted value = tranche's pro-rata share of remaining equity
-    const asConv=t.shares/(runFD+t.shares)*eqForB;
-    const converts=asConv>t.liqPref;
-    conv[k]=converts;
-
-    if(converts){
-      // Converts: shares join common pool, equity unchanged
-      bPayouts[k]=asConv; // will be recalculated at residual per-share
-      runFD+=t.shares;
-      // eqForB stays the same (converting tranches participate in residual)
-    } else {
-      // Takes liq pref
-      const paid=Math.min(t.liqPref,eqForB);
-      bPayouts[k]=paid;
-      eqForB-=paid;
-      // runFD stays the same
+  for(let it=0;it<20;it++){
+    let chg=false;
+    let a1L=conv.A1?0:trD.A1.liqPref;
+    let bL=0;
+    for(const k of CONFIG.trancheKeys){if(k!=="A1"&&!conv[k]) bL+=trD[k].liqPref}
+    const rPool=Math.max(0,eqAvail-a1L-bL);
+    let rSh=baseRes+wSh;
+    for(const k of CONFIG.trancheKeys){if(conv[k]) rSh+=trD[k].shares}
+    const rps=rSh>0?rPool/rSh:0;
+    for(const k of CONFIG.trancheKeys){
+      const sc=trD[k].shares*rps>trD[k].liqPref;
+      if(sc!==conv[k]){conv[k]=sc;chg=true}
     }
+    const a1P=conv.A1?trD.A1.shares*rps:trD.A1.liqPref;
+    const nw=calcWarrantShares(debt+debt*CONFIG.debtRate*yfDebt+a1P);
+    if(nw!==wSh){wSh=nw;chg=true}
+    if(!chg) break;
   }
 
-  // ═══ RESIDUAL CALCULATION ═══
-  const resPool=eqForB; // what's left after all non-converting B liq prefs
-  const resSh=runFD;    // base + all converting shares
+  let a1L=conv.A1?0:trD.A1.liqPref;
+  let bL=0;
+  for(const k of CONFIG.trancheKeys){if(k!=="A1"&&!conv[k]) bL+=trD[k].liqPref}
+  const resPool=Math.max(0,eqAvail-a1L-bL);
+  let resSh=baseRes+wSh;
+  for(const k of CONFIG.trancheKeys){if(conv[k]) resSh+=trD[k].shares}
   const rps=resSh>0?resPool/resSh:0;
 
-  // Recalculate all payouts at residual per-share
   const trPay={};
-  // A-1
-  if(a1wConverts){
-    trPay.A1=CONFIG.tranches.A1.shares*rps;
-  } else {
-    // Pro-rata split of combined liq pref: A-1 gets its share
-    if(combinedLiqPref===0) trPay.A1=0;
-    else trPay.A1=trD.A1.liqPref/combinedLiqPref*Math.min(combinedLiqPref,eqAvail);
-  }
+  for(const k of CONFIG.trancheKeys) trPay[k]=conv[k]?trD[k].shares*rps:trD[k].liqPref;
 
-  // Warrant payout
-  let wPay;
-  if(a1wConverts){
-    wPay=wSh*rps;
-  } else {
-    if(combinedLiqPref===0) wPay=0;
-    else wPay=wLiqPref/combinedLiqPref*Math.min(combinedLiqPref,eqAvail);
-  }
-
-  // B-series payouts
-  for(const k of bOrder){
-    if(conv[k]){
-      trPay[k]=CONFIG.tranches[k].shares*rps;
-    } else {
-      trPay[k]=bPayouts[k]; // already calculated as MIN(liq pref, remaining equity)
-    }
-  }
-
-  const comPay=baseRes*rps;
-
-  // ═══ PHASE 4: 3x MOIC Cap Adjustment ═══
-  let prelimBhcTotal=debt+debtInt+trPay.A1+wPay;
-  let prelimMOIC=prelimBhcTotal/CONFIG.bhcBasis;
-  let moicCapActive=false;
-  let finalWarrant=wSh;
-  let excessToCommon=0;
-
-  if(prelimMOIC>CONFIG.moicTarget){
-    moicCapActive=true;
-    // Target BHC equity (A-1 + W) to achieve exactly 3.0x
-    const targetBhcEquity=CONFIG.moicTarget*CONFIG.bhcBasis-debt-debtInt;
-    // How many warrant shares needed at current rps to reach target?
-    if(rps>0){
-      const adjW=Math.max(0,Math.round(targetBhcEquity/rps-CONFIG.tranches.A1.shares));
-      finalWarrant=Math.min(wSh,adjW);
-    } else {
-      finalWarrant=0;
-    }
-    // Recalculate warrant payout
-    const oldWPay=wPay;
-    if(a1wConverts){
-      wPay=finalWarrant*rps;
-    } else {
-      wPay=finalWarrant*CONFIG.tranches.A1.oip*CONFIG.liqPrefMultiple/combinedLiqPref*Math.min(combinedLiqPref,eqAvail);
-    }
-    excessToCommon=oldWPay-wPay;
-  }
-
+  const wPay=wSh*rps;
   const bhcEq=trPay.A1+wPay;
-  const bhcTot=debt+debtInt+bhcEq;
-  const finalComPay=comPay+excessToCommon;
+  const debtInt=debt*CONFIG.debtRate*yfDebt; const bhcTot=debt+debtInt+bhcEq;
 
-  // ═══ INVESTOR ALLOCATIONS ═══
   const acTr={B1:200000,B2:50000,B3:25000,B4:7381,B5:18125,B6:8658};
   let acapTot=0;
   for(const [tk,sh] of Object.entries(acTr)) acapTot+=trPay[tk]*(sh/CONFIG.tranches[tk].shares);
@@ -561,15 +459,9 @@ function computeWaterfall(ev, exitDate){
   let bkTot=0;
   for(const [tk,sh] of Object.entries(bkTr)) bkTot+=trPay[tk]*(sh/CONFIG.tranches[tk].shares);
 
-  // Total liq prefs for display
-  const a1Liq=a1wConverts?0:trD.A1.liqPref;
-  let bLiq=0;
-  for(const k of bOrder){if(!conv[k]) bLiq+=trD[k].liqPref}
-
-  return {ev,fees,ceo,debt,eqAvail,a1Liq,bLiq,totLiq:a1Liq+bLiq+wLiqPref*(a1wConverts?0:1),resPool,resShares:resSh,rps,
-    conv,trD,trPay,wShares:finalWarrant,wPay,bhcEq,bhcTot,acapTot,bkTot,
-    comPay:finalComPay,pikFactor,yf,yfDebt,debtInt,
-    phase1Conv,moicCapActive,wLiqPref,combinedLiqPref,a1wConverts,excessToCommon};
+  return {ev,fees,ceo,debt,eqAvail,a1Liq:a1L,bLiq:bL,totLiq:a1L+bL,resPool,resShares:resSh,rps,
+    conv,trD,trPay,wShares:wSh,wPay,bhcEq,bhcTot,acapTot,bkTot,
+    comPay:CONFIG.commonShares*rps,pikFactor,yf,yfDebt,debtInt:debt*CONFIG.debtRate*yfDebt};
 }
 
 function computeAllEVs(exitDate){return CONFIG.evs.map(ev=>computeWaterfall(ev,exitDate))}
@@ -598,7 +490,7 @@ function renderCapTable(){
   const tFD=stk.reduce((s,x)=>s+x.fd,0);
   document.getElementById("capTabInfo").innerHTML=cur
     ?"<b>Post-Exchange (3/1/2026)</b>: Excludes B-6 (69,262) and MOIC Warrant (50,529). I&amp;O: "+N(tIO)+" &middot; FD: "+N(tFD)
-    :"<b>Post-Conversion</b>: Includes B-6 (69,262) + MOIC Warrant (up to 50,529 at 12.5% FD cap, subject to 3.0x MOIC cap). I&amp;O: "+N(tIO)+" &middot; FD: "+N(tFD);
+    :"<b>Post-Conversion</b>: Includes B-6 (69,262) + MOIC Warrant (50,529 at 12.5% FD cap). I&amp;O: "+N(tIO)+" &middot; FD: "+N(tFD);
   document.getElementById("pieIOLabel").textContent="Issued & Outstanding \u2014 "+N(tIO);
   document.getElementById("pieFDLabel").textContent="Fully Diluted \u2014 "+N(tFD);
   const cIO=stk.reduce((s,x)=>s+x.c,0),aIO=stk.reduce((s,x)=>s+x.a,0),bIO=stk.reduce((s,x)=>s+x.b,0);
@@ -717,11 +609,10 @@ function update(){
   document.getElementById("wInfo").innerHTML=`<div class="space-y-3 text-sm">
     <div class="flex justify-between"><span class="text-slate-400">BHC MOIC</span><span class="mono font-semibold ${bM<3?"text-amber-400":"text-emerald-400"}">${X(bM)}</span></div>
     <div class="flex justify-between"><span class="text-slate-400">Target</span><span class="mono">3.00x</span></div>
-    <div class="flex justify-between"><span class="text-slate-400">A-1+W Converts?</span><span class="mono font-semibold ${w.a1wConverts?"text-emerald-400":"text-amber-400"}">${w.a1wConverts?"YES":"NO"}</span></div>
     <div class="flex justify-between"><span class="text-slate-400">Warrant Shares</span><span class="mono font-semibold">${N(w.wShares)}</span></div>
     <div class="flex justify-between"><span class="text-slate-400">Warrant Proceeds</span><span class="mono">${$(w.wPay)}</span></div>
-    ${w.moicCapActive?'<div class="p-2 rounded text-xs" style="background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);color:#3B82F6">\u2713 3.0x MOIC cap active \u2014 warrant reduced to '+N(w.wShares)+' shares</div>':w.wShares>0?'<div class="p-2 rounded text-xs" style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);color:#F59E0B">\u26a0\ufe0f Ratchet ACTIVE \u2014 '+N(w.wShares)+' shares (12.5% cap)</div>':'<div class="p-2 rounded text-xs" style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);color:#10B981">\u2713 No warrant needed \u2014 MOIC exceeds 3.0x naturally</div>'}
-  </div>``;
+    ${w.wShares>0?'<div class="p-2 rounded text-xs" style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);color:#F59E0B">\u26a0\ufe0f Ratchet ACTIVE \u2014 '+N(w.wShares)+' shares</div>':'<div class="p-2 rounded text-xs" style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);color:#10B981">\u2713 No warrant needed</div>'}
+  </div>`;
   const cp=ev>0?w.ceo/ev:0;
   document.getElementById("ceoCta").textContent=`${$(w.ceo)} (${(cp*100).toFixed(2)}% of EV)`;
 
@@ -900,7 +791,7 @@ const INVESTOR_PROFILES={
     holdings:[{type:"Senior Debt",detail:"$10M at 14%",shares:"\u2014"},{type:"A-1 Preferred",detail:"130,984 shares at $26.68",shares:"130,984"},{type:"MOIC Warrant",detail:"Up to 50,529 (12.5% cap)",shares:"\u226450,529"}],
     keyTerms:["Senior secured \u2014 first out after fees/CEO","A-1: 2.0x liq pref + 8% PIK","MOIC ratchet if < 3.0x (capped 12.5% FD)"],
     getRet:function(w){return{tot:w.bhcTot,moic:w.bhcTot/this.basis,gain:w.bhcTot-this.basis,
-      comp:[{l:"Debt Principal",v:w.debt},{l:"Debt Interest (14%)",v:w.debtInt},{l:"A-1 "+(w.conv.A1?"Conv":"Liq"),v:w.trPay.A1},{l:"MOIC Warrant"+(w.moicCapActive?" (3x capped)":""),v:w.wPay}]}}},
+      comp:[{l:"Debt",v:w.debt},{l:"A-1 "+(w.conv.A1?"Conv":"Liq"),v:w.trPay.A1},{l:"Warrant",v:w.wPay}]}}},
   ACAP:{name:"Attain Capital Partners",short:"ACAP",color:"#10B981",accent:"#047857",basis:ACAP_BASIS,
     desc:"Lead B-series preferred investor",
     holdings:[{type:"B-1",detail:"200,000 @ $15",shares:"200,000"},{type:"B-2",detail:"50,000 @ $20",shares:"50,000"},
@@ -975,7 +866,7 @@ async function exportInvestorPDF(key){
 
   const tp=pdf.internal.getNumberOfPages();
   for(let p=1;p<=tp;p++){pdf.setPage(p);sf(7,"normal","#94A3B8");
-    pdf.text("Cardinality v1.9 \u2014 "+inv.name+" \u2014 Confidential",W/2,H-6,{align:"center"});
+    pdf.text("Cardinality v1.6 \u2014 "+inv.name+" \u2014 Confidential",W/2,H-6,{align:"center"});
     pdf.text("Page "+p+"/"+tp,W-m,H-6,{align:"right"})}
   pdf.save(`Cardinality_${inv.short}_${new Date().toISOString().slice(0,10)}.pdf`);
 }
